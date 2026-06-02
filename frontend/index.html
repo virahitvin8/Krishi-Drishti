@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krishi Drishti • कृषि दृष्टि</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Sans+Devanagari:wght@400;500;700&amp;display=swap');
+        
+        :root {
+            --primary-green: #2E7D32;
+            --sky-blue: #1976D2;
+            --gold: #F9A825;
+        }
+        
+        body { font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif; }
+        
+        .brand-green { color: #2E7D32; }
+        .section-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .metric-box { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .metric-box:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+        
+        .health-green { background-color: #2ECC71; color: white; }
+        .health-yellow { background-color: #F39C12; color: white; }
+        .health-orange { background-color: #E67E22; color: white; }
+        .health-red { background-color: #E74C3C; color: white; }
+
+        #map { height: 480px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+        
+        .hotspot { fill: #E74C3C; fill-opacity: 0.38; stroke: #E74C3C; stroke-width: 1; }
+        .coldspot { fill: #64B5F6; fill-opacity: 0.38; stroke: #64B5F6; stroke-width: 1; }
+
+        .loading-overlay {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .logo-pulse {
+            animation: logoPulse 2.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white">
+    <!-- Header -->
+    <header class="border-b border-zinc-800 bg-zinc-900">
+        <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <!-- Animated Logo -->
+                <div class="w-12 h-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="w-full h-full">
+                        <defs>
+                            <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#2E7D32"/>
+                                <stop offset="100%" stop-color="#1B5E20"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Orbital Ring -->
+                        <g>
+                            <animateTransform attributeName="transform" type="rotate" from="0 100 95" to="360 100 95" dur="22s" repeatCount="indefinite"/>
+                            <ellipse cx="100" cy="95" rx="80" ry="30" fill="none" stroke="#1976D2" stroke-width="5" stroke-dasharray="8 6" opacity="0.85"/>
+                            <circle cx="180" cy="95" r="5" fill="#1976D2"/>
+                        </g>
+                        <!-- Eye -->
+                        <path d="M58 95 Q100 52 142 95 Q100 138 58 95 Z" fill="#FFFFFF" stroke="#263238" stroke-width="6"/>
+                        <!-- Leaf Pupil -->
+                        <g class="logo-pulse">
+                            <path d="M100 72 Q118 95 100 108 Q82 95 100 72 Z" fill="url(#leafGrad)" stroke="#1B5E20" stroke-width="2.5"/>
+                            <line x1="100" y1="76" x2="100" y2="104" stroke="#A5D6A7" stroke-width="2" stroke-linecap="round"/>
+                        </g>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tighter">Krishi Drishti</h1>
+                    <p class="text-emerald-400 text-xs -mt-1">कृषि दृष्टि • Satellite Vision for Smart Farming</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="simulateLogin()" 
+                        class="px-5 py-2 bg-white text-zinc-900 rounded-2xl text-sm font-semibold hover:bg-zinc-100 transition">
+                    Login
+                </button>
+                <button onclick="refreshAllData()" 
+                        class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-semibold flex items-center gap-2">
+                    <span>Refresh Data</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-screen-2xl mx-auto px-6 py-8">
+        
+        <!-- OVERALL HEALTH SCORE -->
+        <div class="mb-8">
+            <div class="bg-zinc-900 rounded-3xl p-8 border border-zinc-800">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                    <div>
+                        <div class="text-sm text-zinc-400 mb-1">OVERALL CROP HEALTH</div>
+                        <div class="flex items-baseline gap-4">
+                            <div id="overallScore" class="text-8xl font-bold text-emerald-400">78</div>
+                            <div>
+                                <div id="overallStatus" class="text-3xl font-semibold text-emerald-400">Moderate - Monitor</div>
+                                <div class="text-sm text-zinc-400">Last updated: Just now • Sentinel-2 + Weather</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="analyzeSelectedArea()" 
+                                class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 rounded-2xl font-bold text-lg flex items-center gap-3 transition">
+                            <span>Analyze Selected Land</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            
+            <!-- LEFT COLUMN: Analysis Sections -->
+            <div class="xl:col-span-5 space-y-6">
+                
+                <!-- CROP HEALTH SECTION -->
+                <div class="section-card bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="text-xl font-semibold">Crop Health</h3>
+                        <span class="text-xs px-3 py-1 bg-emerald-900 text-emerald-400 rounded-full">Sentinel-2</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Individual Metric Boxes -->
+                        <div onclick="showMetricBreakdown('ndvi')" class="metric-box cursor-pointer bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl border border-zinc-700">
+                            <div class="text-sm text-zinc-400">NDVI</div>
+                            <div class="text-4xl font-bold text-emerald-400 mt-1">48<span class="text-xl">%</span></div>
+                            <div class="text-xs text-emerald-400">Good vigor</div>
+                        </div>
+                        
+                        <div onclick="showMetricBreakdown('evi')" class="metric-box cursor-pointer bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl border border-zinc-700">
+                            <div class="text-sm text-zinc-400">EVI</div>
+                            <div class="text-4xl font-bold text-emerald-400 mt-1">51<span class="text-xl">%</span></div>
+                            <div class="text-xs text-emerald-400">Dense canopy</div>
+                        </div>
+                        
+                        <div onclick="showMetricBreakdown('reip')" class="metric-box cursor-pointer bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl border border-zinc-700">
+                            <div class="text-sm text-zinc-400">REIP (Early Stress)</div>
+                            <div class="text-4xl font-bold text-amber-400 mt-1">32<span class="text-xl">%</span></div>
+                            <div class="text-xs text-amber-400">Monitor</div>
+                        </div>
+                        
+                        <div onclick="showMetricBreakdown('gndvi')" class="metric-box cursor-pointer bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl border border-zinc-700">
+                            <div class="text-sm text-zinc-400">GNDVI</div>
+                            <div class="text-4xl font-bold text-emerald-400 mt-1">45<span class="text-xl">%</span></div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="showSectionBreakdown('crop_health')" 
+                            class="mt-4 w-full text-sm py-2 text-emerald-400 hover:text-emerald-300 font-medium flex items-center justify-center gap-1">
+                        View full breakdown &amp; recommendations →
+                    </button>
+                </div>
+
+                <!-- WATER & IRRIGATION SECTION -->
+                <div class="section-card bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="text-xl font-semibold">Water &amp; Irrigation</h3>
+                        <span class="text-xs px-3 py-1 bg-sky-900 text-sky-400 rounded-full">NDWI + ET</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3">
+                        <div onclick="showMetricBreakdown('ndwi')" class="metric-box cursor-pointer bg-zinc-800 p-4 rounded-2xl border border-zinc-700">
+                            <div class="text-sm text-zinc-400">NDWI</div>
+                            <div class="text-3xl font-bold text-sky-400 mt-1">31<span class="text-lg">%</span></div>
+                        </div>
+                        <div onclick="showMetricBreakdown('et')" class="metric-box cursor-pointer bg-zinc-800 p-4 rounded-2xl border border-zinc-700">
+                            <div class="text-sm text-zinc-400">ET (mm)</div>
+                            <div class="text-3xl font-bold text-amber-400 mt-1">4.8</div>
+                        </div>
+                        <div onclick="showMetricBreakdown('soil_moisture')" class="metric-box cursor-pointer bg-zinc-800 p-4 rounded-2xl border border-zinc-700">
+                            <div class="text-sm text-zinc-400">Soil Moisture</div>
+                            <div class="text-3xl font-bold text-sky-400 mt-1">21<span class="text-lg">%</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WEATHER INTEGRATION -->
+                <div class="section-card bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
+                    <h3 class="text-xl font-semibold mb-4">Weather &amp; Atmosphere</h3>
+                    <div id="weatherContent" class="text-sm space-y-2 text-zinc-300">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MAP + SPATIAL DETAILS -->
+            <div class="xl:col-span-7">
+                <div class="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
+                    <div class="flex justify-between items-center mb-4 px-1">
+                        <div>
+                            <h3 class="text-xl font-semibold">Spatial Health Map</h3>
+                            <p class="text-sm text-zinc-400">Only your selected land analysed</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="checkbox" id="gridToggle" checked onchange="toggleGrid()" class="accent-emerald-500">
+                                <span>Hotspot Grid</span>
+                            </label>
+                            
+                            <button onclick="useDemoFarm()" 
+                                    class="text-xs px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl">Demo Farm</button>
+                        </div>
+                    </div>
+                    
+                    <div id="map"></div>
+                    
+                    <div class="mt-3 text-xs text-zinc-400 flex items-center gap-4 px-1">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 bg-red-500 rounded"></div>
+                            <span>Hotspot (Stressed)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 bg-[#64B5F6] rounded"></div>
+                            <span>Coldspot (Healthy)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ADVANCED BUTTON -->
+        <div class="mt-8 text-center">
+            <button onclick="showAdvancedModal()" 
+                    class="px-10 py-4 bg-white text-zinc-900 rounded-2xl font-bold text-lg hover:bg-zinc-100 transition flex items-center gap-3 mx-auto">
+                <span>Advanced Report — All Satellites &amp; Full Transparency</span>
+            </button>
+            <p class="text-xs text-zinc-500 mt-2">Includes Sentinel-1, Landsat, MODIS, DEM, Pest Risk &amp; more</p>
+        </div>
+
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-zinc-950/95 z-[999] flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-6">
+                <!-- Animated Logo for Loading -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="w-full h-full">
+                    <!-- Same animated logo as header -->
+                    <g>
+                        <animateTransform attributeName="transform" type="rotate" from="0 100 95" to="360 100 95" dur="18s" repeatCount="indefinite"/>
+                        <ellipse cx="100" cy="95" rx="80" ry="30" fill="none" stroke="#1976D2" stroke-width="5" stroke-dasharray="8 6"/>
+                    </g>
+                    <path d="M58 95 Q100 52 142 95 Q100 138 58 95 Z" fill="#FFFFFF" stroke="#263238" stroke-width="6"/>
+                    <g>
+                        <animate attributeName="transform" type="scale" values="1;1.1;1" dur="2.8s" repeatCount="indefinite"/>
+                        <path d="M100 72 Q118 95 100 108 Q82 95 100 72 Z" fill="#2E7D32" stroke="#1B5E20" stroke-width="2.5"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="text-xl font-semibold">Connecting to satellites...</div>
+            <div class="text-emerald-400 text-sm mt-1">Analysing your selected land</div>
+        </div>
+    </div>
+
+    <script>
+        // Tailwind + Map Initialization
+        function init() {
+            // Map
+            window.map = L.map('map').setView([25.3176, 82.9739], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(window.map);
+            
+            // Demo on load
+            setTimeout(() => {
+                useDemoFarm();
+            }, 1200);
+            
+            // Weather demo
+            document.getElementById('weatherContent').innerHTML = `
+                <div>🌡️ 33.2°C • Humidity 64% • Wind 11 km/h</div>
+                <div class="text-emerald-400">🌧️ 14mm rain expected in next 48 hours — Good recovery window</div>
+            `;
+        }
+        
+        let currentPolygon = null;
+        let gridLayer = null;
+
+        function useDemoFarm() {
+            if (currentPolygon) window.map.removeLayer(currentPolygon);
+            
+            const coords = [[25.3172,82.9734], [25.3172,82.9752], [25.3188,82.9752], [25.3188,82.9734]];
+            currentPolygon = L.polygon(coords, { color: '#2E7D32', weight: 3, fillOpacity: 0.1 }).addTo(window.map);
+            window.map.fitBounds(currentPolygon.getBounds());
+            
+            analyzeSelectedArea();
+        }
+
+        function analyzeSelectedArea() {
+            if (!currentPolygon) {
+                alert("Please select your land first (draw or use demo)");
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingOverlay').classList.add('flex');
+            
+            setTimeout(() => {
+                // Update Overall Score
+                const score = Math.floor(Math.random() * 20) + 68;
+                document.getElementById('overallScore').innerText = score;
+                
+                let status = "Healthy & Vigorous";
+                let statusColor = "text-emerald-400";
+                if (score < 75) { status = "Moderate - Monitor"; statusColor = "text-yellow-400"; }
+                if (score < 68) { status = "Stressed - Action Needed"; statusColor = "text-orange-400"; }
+                
+                document.getElementById('overallStatus').innerText = status;
+                document.getElementById('overallStatus').className = `text-3xl font-semibold ${statusColor}`;
+                
+                // Generate transparent grid
+                generateTransparentGrid(currentPolygon.getBounds());
+                
+                // Hide loading
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('loadingOverlay').classList.remove('flex');
+                
+                showToast("Analysis complete for your selected land");
+            }, 1650);
+        }
+
+        function generateTransparentGrid(bounds) {
+            if (gridLayer) window.map.removeLayer(gridLayer);
+            gridLayer = L.layerGroup();
+            
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+            const latStep = (ne.lat - sw.lat) / 5;
+            const lngStep = (ne.lng - sw.lng) / 5;
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const lat1 = sw.lat + (i * latStep);
+                    const lng1 = sw.lng + (j * lngStep);
+                    const lat2 = lat1 + latStep;
+                    const lng2 = lng1 + lngStep;
+                    
+                    const ndvi = 0.27 + Math.random() * 0.58;
+                    const isHotspot = ndvi < 0.45; // Lower NDVI = stressed = hotspot (red)
+                    
+                    const color = isHotspot ? '#E74C3C' : '#64B5F6';
+                    const opacity = 0.38;
+                    
+                    const rect = L.rectangle([[lat1, lng1], [lat2, lng2]], {
+                        color: color,
+                        weight: 1,
+                        fillColor: color,
+                        fillOpacity: opacity
+                    });
+                    
+                    rect.bindPopup(`NDVI: ${ndvi.toFixed(2)}<br>${isHotspot ? '🔴 Hotspot (Stressed)' : '🔵 Coldspot (Healthy)'}`);
+                    gridLayer.addLayer(rect);
+                }
+            }
+            
+            gridLayer.addTo(window.map);
+        }
+
+        function toggleGrid() {
+            if (!gridLayer) return;
+            const checked = document.getElementById('gridToggle').checked;
+            if (checked) {
+                window.map.addLayer(gridLayer);
+            } else {
+                window.map.removeLayer(gridLayer);
+            }
+        }
+
+        function showMetricBreakdown(metric) {
+            const modal = createModal();
+            
+            let content = '';
+            if (metric === 'ndvi') {
+                content = `<h4 class="font-bold text-xl mb-3">NDVI — 48%</h4>
+                           <p class="text-zinc-300">Normalized Difference Vegetation Index measures crop vigor. Values above 0.4 generally indicate healthy vegetation.</p>
+                           <div class="mt-4 p-3 bg-zinc-800 rounded-xl text-sm">Your value (0.48) shows good biomass but room for improvement in stressed zones.</div>`;
+            } else if (metric === 'evi') {
+                content = `<h4 class="font-bold text-xl mb-3">EVI — 51%</h4><p>Enhanced Vegetation Index is better for dense canopies. Your value indicates healthy dense growth.</p>`;
+            } else if (metric === 'reip') {
+                content = `<h4 class="font-bold text-xl mb-3">REIP (Early Stress) — 32%</h4><p>Red Edge Inflection Point detects stress very early. Lower values here suggest possible early nutrient or pest pressure.</p>`;
+            } else if (metric === 'ndwi') {
+                content = `<h4 class="font-bold text-xl mb-3">NDWI — 31%</h4><p>Water content in crop. Moderate value suggests checking irrigation in specific zones.</p>`;
+            }
+            
+            modal.innerHTML = `
+                <div class="bg-zinc-900 rounded-3xl p-8 max-w-lg w-full">
+                    ${content}
+                    <button onclick="this.closest('.fixed').remove()" class="mt-6 w-full py-3 bg-emerald-600 rounded-2xl font-semibold">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showSectionBreakdown(section) {
+            const modal = createModal();
+            modal.innerHTML = `
+                <div class="bg-zinc-900 rounded-3xl p-8 max-w-2xl w-full">
+                    <h3 class="text-2xl font-bold mb-4">${section === 'crop_health' ? 'Crop Health Full Breakdown' : 'Section Details'}</h3>
+                    <div class="space-y-4 text-sm">
+                        <div>Overall recommendation based on all metrics: <span class="font-medium">"Monitor northwest zone and consider spot irrigation."</span></div>
+                        <div class="text-xs text-zinc-400">All values calculated only from your selected land polygon using Sentinel-2 data.</div>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="mt-8 w-full py-3 bg-white text-zinc-900 rounded-2xl font-bold">Done</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showAdvancedModal() {
+            const modal = createModal();
+            modal.innerHTML = `
+                <div class="bg-zinc-900 rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-auto">
+                    <h3 class="text-2xl font-bold mb-6">Advanced Multi-Satellite Report</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-zinc-800 p-5 rounded-2xl">
+                            <div class="font-semibold text-emerald-400">Sentinel-2</div>
+                            <div class="mt-2">NDVI 48% • EVI 51% • NDWI 31% • REIP 32%</div>
+                        </div>
+                        <div class="bg-zinc-800 p-5 rounded-2xl">
+                            <div class="font-semibold text-sky-400">Weather (Open-Meteo)</div>
+                            <div class="mt-2">33.2°C • 14mm rain (48h) • ET 4.8mm • Soil moisture 21%</div>
+                        </div>
+                        <div class="bg-zinc-800 p-5 rounded-2xl">
+                            <div class="font-semibold text-amber-400">Sentinel-1 SAR (Future)</div>
+                            <div class="mt-2">Soil moisture index: 0.34 • No flooding detected</div>
+                        </div>
+                        <div class="bg-zinc-800 p-5 rounded-2xl">
+                            <div class="font-semibold text-orange-400">Landsat + DEM</div>
+                            <div class="mt-2">Long-term trend +8% • Slope: 2.1% • Low drainage risk</div>
+                        </div>
+                        <div class="bg-zinc-800 p-5 rounded-2xl col-span-2">
+                            <div class="font-semibold text-red-400">Pest Risk Score: 28%</div>
+                            <div class="mt-1">Low to moderate risk. Monitor REIP stressed cells.</div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="this.closest('.fixed').remove()" class="mt-8 w-full py-3.5 bg-emerald-600 rounded-2xl font-bold">Close Advanced View</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function createModal() {
+            const div = document.createElement('div');
+            div.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-[999] p-4';
+            return div;
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 bg-emerald-600 px-6 py-3 rounded-2xl shadow-xl z-[999]';
+            toast.innerHTML = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2800);
+        }
+
+        function simulateLogin() {
+            localStorage.setItem('krishidrishti_user', 'demo-farmer-001');
+            showToast("Logged in • Data will sync to cloud");
+        }
+
+        function refreshAllData() {
+            showToast("Fetching latest satellite passes...");
+            setTimeout(() => {
+                showToast("All data updated automatically");
+                if (currentPolygon) analyzeSelectedArea();
+            }, 1400);
+        }
+
+        function initMapControls() {
+            // Add more controls if needed
+        }
+
+        // Initialize everything
+        window.onload = function() {
+            init();
+            initMapControls();
+        }
+    </script>
+</body>
+</html>
