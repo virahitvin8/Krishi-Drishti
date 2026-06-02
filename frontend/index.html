@@ -539,39 +539,43 @@
                                     <span>Go to <a href="https://grafana.com" target="_blank" class="text-sky-400 underline">grafana.com</a> → Sign up for <strong>Grafana Cloud Free</strong></span>
                                 </li>
                                 <li class="flex items-start gap-3">
+                                    <span class="bg-yellow-900 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">⚡</span>
+                                    <span><strong>Fastest option:</strong> Connect <strong>Supabase PostgreSQL</strong> directly (<a href="https://krishi-drishti-backend.onrender.com/api/v1/grafana/dashboard-json/postgres" target="_blank" class="text-emerald-400 underline">get PostgreSQL dashboard JSON</a>)</span>
+                                </li>
+                                <li class="flex items-start gap-3">
                                     <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                                    <span>In Grafana, go to <strong>Connections → Data sources → Add → Infinity</strong></span>
+                                    <span>Or use <strong>Infinity API datasource:</strong> Connections → Add → Infinity → URL: <code class="bg-zinc-900 px-2 py-0.5 rounded text-emerald-400">https://krishi-drishti-backend.onrender.com</code></span>
                                 </li>
                                 <li class="flex items-start gap-3">
                                     <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-                                    <span>Configure URL: <code class="bg-zinc-900 px-2 py-0.5 rounded text-emerald-400">https://krishi-drishti-backend.onrender.com</code></span>
+                                    <span><strong>Import Dashboard:</strong> Choose your datasource type → Get the matching JSON → <strong>Dashboards → New → Import</strong></span>
                                 </li>
                                 <li class="flex items-start gap-3">
                                     <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
-                                    <span><strong>Import Dashboard:</strong> Copy the JSON from <code class="bg-zinc-900 px-2 py-0.5 rounded">/api/v1/grafana/dashboard-json</code> endpoint</span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">5</span>
-                                    <span>Go to <strong>Dashboards → New → Import</strong> → Paste JSON → Select Infinity datasource</span>
+                                    <span>Paste JSON → Select your datasource → Click <strong>Import</strong></span>
                                 </li>
                             </ol>
                         </div>
                         
                         <!-- Quick Action Buttons -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-3 gap-3">
                             <a href="https://krishi-drishti-backend.onrender.com/api/v1/grafana/dashboard-json" target="_blank"
-                               class="bg-emerald-600 hover:bg-emerald-700 p-4 rounded-2xl text-center font-semibold transition">
-                                📄 Get Dashboard JSON
+                               class="bg-emerald-600 hover:bg-emerald-700 p-4 rounded-2xl text-center text-sm font-semibold transition hover:scale-[1.02]">
+                                📄 Infinity JSON
+                            </a>
+                            <a href="https://krishi-drishti-backend.onrender.com/api/v1/grafana/dashboard-json/postgres" target="_blank"
+                               class="bg-sky-600 hover:bg-sky-700 p-4 rounded-2xl text-center text-sm font-semibold transition hover:scale-[1.02]">
+                                🗄️ PostgreSQL JSON
                             </a>
                             <a href="https://grafana.com" target="_blank"
-                               class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-2xl text-center font-semibold transition">
+                               class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-2xl text-center text-sm font-semibold transition hover:scale-[1.02]">
                                 🔗 Open Grafana Cloud
                             </a>
                         </div>
                         
                         <div class="text-xs text-zinc-500 text-center">
-                            Works with Grafana Cloud Free Tier (up to 10k metrics, 3 users).
-                            Full setup guide: <code class="text-zinc-400">DEPLOY_GRAFANA.md</code>
+                            ⚡ For fastest performance, use <strong>PostgreSQL JSON</strong> with your <strong>Supabase DB</strong>.
+                            Full guide: <code class="text-zinc-400">DEPLOY_GRAFANA_POSTGRES.md</code> (in repo) or <a href="https://github.com/virahitvin8/Krishi-Drishti/blob/main/DEPLOY_GRAFANA_POSTGRES.md" target="_blank" class="text-sky-400 underline">view on GitHub</a>
                         </div>
                     </div>
                     
