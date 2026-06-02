@@ -1,0 +1,38 @@
+# ============================================
+# Krishi Drishti - Netlify Configuration
+# Auto-deploy settings for the frontend
+# ============================================
+
+[build]
+  # Publish directory is 'frontend' folder
+  publish = "frontend"
+  command = "echo 'No build step needed - pure HTML/CSS/JS'"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# ---- Redirects ----
+# Serve index.html for all routes (SPA-like behavior)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ---- Headers ----
+# Security and PWA headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"

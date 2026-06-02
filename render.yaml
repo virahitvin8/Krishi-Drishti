@@ -1,0 +1,48 @@
+# ============================================
+# Krishi Drishti - Render Blueprint (render.yaml)
+# Auto-deploy configuration for backend
+# ============================================
+# To use: Push this file to GitHub, then in Render Dashboard:
+#   "New" → "Blueprint" → Connect your repo
+# Render will auto-detect this file and deploy the Web Service.
+
+services:
+  # ---- Backend API (FastAPI on Uvicorn) ----
+  - type: web
+    name: krishi-drishti-backend
+    env: python
+    region: ohio  # Closest to India
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r backend/requirements.txt
+    startCommand: |
+      uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health
+    runtime: python 3.11
+    
+    # ---- Environment Variables ----
+    # ⚠️ IMPORTANT: Set these in Render Dashboard under Environment tab
+    envVars:
+      - key: CDSE_CLIENT_ID
+        sync: false  # Set manually in Render dashboard
+      - key: CDSE_CLIENT_SECRET
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: USGS_USERNAME
+        sync: false
+      - key: USGS_PASSWORD
+        sync: false
+      - key: NASA_EARTHDATA_USER
+        sync: false
+      - key: NASA_EARTHDATA_PASS
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+
+    # ---- Auto-Deploy Settings ----
+    autoDeploy: true
+    branch: main

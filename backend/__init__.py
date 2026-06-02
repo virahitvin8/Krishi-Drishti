@@ -1,0 +1,1 @@
+"""Krishi Drishti Backend Package"""

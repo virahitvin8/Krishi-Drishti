@@ -1,0 +1,48 @@
+# ====================================
+# Krishi Drishti - .gitignore
+# ====================================
+
+# Environment variables (contains API keys & secrets)
+.env
+backend/.env
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Deployment-specific (generated on the fly)
+*.pid
+*.seed
+*.log
+*.pot
+
+# Node (if any)
+node_modules/
+.npm/
+
+# Jupyter Notebooks (if any)
+.ipynb_checkpoints/
+
+# Sentinel Hub config files
+sentinelhub_config.json
