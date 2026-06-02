@@ -231,13 +231,28 @@
 
         </div>
 
-        <!-- ADVANCED BUTTON -->
-        <div class="mt-8 text-center">
-            <button onclick="showAdvancedModal()" 
-                    class="px-10 py-4 bg-white text-zinc-900 rounded-2xl font-bold text-lg hover:bg-zinc-100 transition flex items-center gap-3 mx-auto">
-                <span>Advanced Report — All Satellites &amp; Full Transparency</span>
+        <!-- QUICK ACTIONS -->
+        <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button onclick="showCSVUploadModal()" class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl text-center hover:bg-zinc-800 transition group">
+                <div class="text-2xl mb-1 group-hover:scale-110 transition">📄</div>
+                <div class="text-xs font-medium">Upload CSV</div>
+                <div class="text-[10px] text-zinc-500">Batch analyze fields</div>
             </button>
-            <p class="text-xs text-zinc-500 mt-2">Includes Sentinel-1, Landsat, MODIS, DEM, Pest Risk &amp; more</p>
+            <button onclick="showAdvancedModal()" class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl text-center hover:bg-zinc-800 transition group">
+                <div class="text-2xl mb-1 group-hover:scale-110 transition">📊</div>
+                <div class="text-xs font-medium">Full Report</div>
+                <div class="text-[10px] text-zinc-500">Detailed analysis</div>
+            </button>
+            <button onclick="showSatelliteInfo()" class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl text-center hover:bg-zinc-800 transition group">
+                <div class="text-2xl mb-1 group-hover:scale-110 transition">🛰️</div>
+                <div class="text-xs font-medium">Satellites</div>
+                <div class="text-[10px] text-zinc-500">Data sources</div>
+            </button>
+            <button onclick="showGrafanaModal()" class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl text-center hover:bg-zinc-800 transition group">
+                <div class="text-2xl mb-1 group-hover:scale-110 transition">📈</div>
+                <div class="text-xs font-medium">Grafana</div>
+                <div class="text-[10px] text-zinc-500">Live dashboard</div>
+            </button>
         </div>
 
     </div>
@@ -482,8 +497,88 @@
             }, 1400);
         }
 
-        function initMapControls() {
-            // Add more controls if needed
+        function initMapControls() {}
+
+        // ---- GRAFANA INTEGRATION ----
+        function showGrafanaModal() {
+            const modal = createModal();
+            modal.innerHTML = `
+                <div class="bg-zinc-900 rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-auto border border-zinc-700">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold flex items-center gap-2">
+                                <span>📈 Grafana Live Dashboard</span>
+                            </h3>
+                            <p class="text-sm text-zinc-400 mt-1">Real-time agricultural monitoring with interactive panels</p>
+                        </div>
+                        <button onclick="this.closest('.fixed').remove()" class="text-zinc-400 hover:text-white text-xl">✕</button>
+                    </div>
+                    
+                    <div class="grid gap-4">
+                        <!-- Overview Cards -->
+                        <div class="bg-zinc-800 p-5 rounded-2xl border border-zinc-700">
+                            <h4 class="font-semibold text-emerald-400 mb-3">📊 Dashboard Includes</h4>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> Crop Health Score (Stat)</div>
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> NDVI Trend (Time-series)</div>
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> All Vegetation Indices</div>
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> Weather Parameters</div>
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> Pest Risk Gauge</div>
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> Field Health Map (GeoMap)</div>
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> Health Distribution</div>
+                                <div class="flex items-center gap-2"><span class="text-emerald-400">•</span> Alerts &amp; Recommendations</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Setup Steps -->
+                        <div class="bg-zinc-800 p-5 rounded-2xl border border-zinc-700">
+                            <h4 class="font-semibold text-sky-400 mb-3">🚀 Setup Grafana (5 minutes)</h4>
+                            <ol class="space-y-3 text-sm">
+                                <li class="flex items-start gap-3">
+                                    <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                                    <span>Go to <a href="https://grafana.com" target="_blank" class="text-sky-400 underline">grafana.com</a> → Sign up for <strong>Grafana Cloud Free</strong></span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                                    <span>In Grafana, go to <strong>Connections → Data sources → Add → Infinity</strong></span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+                                    <span>Configure URL: <code class="bg-zinc-900 px-2 py-0.5 rounded text-emerald-400">https://krishi-drishti-backend.onrender.com</code></span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+                                    <span><strong>Import Dashboard:</strong> Copy the JSON from <code class="bg-zinc-900 px-2 py-0.5 rounded">/api/v1/grafana/dashboard-json</code> endpoint</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="bg-sky-900 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">5</span>
+                                    <span>Go to <strong>Dashboards → New → Import</strong> → Paste JSON → Select Infinity datasource</span>
+                                </li>
+                            </ol>
+                        </div>
+                        
+                        <!-- Quick Action Buttons -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="https://krishi-drishti-backend.onrender.com/api/v1/grafana/dashboard-json" target="_blank"
+                               class="bg-emerald-600 hover:bg-emerald-700 p-4 rounded-2xl text-center font-semibold transition">
+                                📄 Get Dashboard JSON
+                            </a>
+                            <a href="https://grafana.com" target="_blank"
+                               class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-2xl text-center font-semibold transition">
+                                🔗 Open Grafana Cloud
+                            </a>
+                        </div>
+                        
+                        <div class="text-xs text-zinc-500 text-center">
+                            Works with Grafana Cloud Free Tier (up to 10k metrics, 3 users).
+                            Full setup guide: <code class="text-zinc-400">DEPLOY_GRAFANA.md</code>
+                        </div>
+                    </div>
+                    
+                    <button onclick="this.closest('.fixed').remove()" class="mt-6 w-full py-3 bg-white text-zinc-900 rounded-2xl font-bold">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         // Initialize everything
