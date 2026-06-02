@@ -82,10 +82,52 @@ async def list_field_profiles(limit: int = 50) -> List[Dict[str, Any]]:
 # --- Analysis Records ---
 
 async def save_analysis(analysis_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Save an analysis result."""
+    """Save an analysis result.
+    
+    Automatically extracts individual metric columns from the nested 'analysis' dict
+    so that PostgreSQL Grafana queries can read them directly:
+      - health_score, ndvi, evi, ndwi, gndvi, reip, savi
+      - soil_moisture_pct, drainage_score, pest_risk_score
+      - temperature_c, humidity_pct, precipitation_mm
+    """
     analysis_id = f"analysis_{uuid4().hex[:12]}"
     analysis_data["analysis_id"] = analysis_id
-    analysis_data["created_at"] = datetime.utcnow().isoformat()
+    if "created_at" not in analysis_data:
+        analysis_data["created_at"] = datetime.utcnow().isoformat()
+    
+    # Extract flat metric columns from nested 'analysis' dict for Grafana PostgreSQL queries
+    nested = analysis_data.get("analysis", {})
+    
+    # Health score
+    hs = nested.get("health_score", {})
+    analysis_data["health_score"] = analysis_data.get("health_score") or hs.get("overall", 0)
+    
+    # Vegetation indices
+    veg = nested.get("vegetation", {})
+    analysis_data["ndvi"] = analysis_data.get("ndvi") or veg.get("ndvi", 0)
+    analysis_data["evi"] = analysis_data.get("evi") or veg.get("evi", 0)
+    analysis_data["ndwi"] = analysis_data.get("ndwi") or veg.get("ndwi", 0)
+    analysis_data["gndvi"] = analysis_data.get("gndvi") or veg.get("gndvi", 0)
+    analysis_data["reip"] = analysis_data.get("reip") or veg.get("reip", 0)
+    analysis_data["savi"] = analysis_data.get("savi") or veg.get("savi", 0)
+    
+    # Soil
+    soil = nested.get("soil", {})
+    analysis_data["soil_moisture_pct"] = analysis_data.get("soil_moisture_pct") or soil.get("moisture_pct", 0)
+    analysis_data["drainage_score"] = analysis_data.get("drainage_score") or soil.get("drainage_score", 50)
+    
+    # Pest risk
+    pest = nested.get("pest_risk", {})
+    analysis_data["pest_risk_score"] = analysis_data.get("pest_risk_score") or pest.get("score", 0)
+    
+    # Weather
+    weather = nested.get("weather", {})
+    analysis_data["temperature_c"] = analysis_data.get("temperature_c") or weather.get("temperature_c", 0)
+    analysis_data["humidity_pct"] = analysis_data.get("humidity_pct") or weather.get("humidity_pct", 0)
+    analysis_data["precipitation_mm"] = analysis_data.get("precipitation_mm") or weather.get("precipitation_mm", 0)
+    
+    # Also handle the case where nested dict keys are passed directly at top level
+    # (for demo data that already has flat columns populated)
     
     if _supabase:
         try:

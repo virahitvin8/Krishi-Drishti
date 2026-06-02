@@ -63,10 +63,17 @@ async def analyze_field(request: AnalyzeRequest):
         weather = await fetch_weather_data(lat, lng)
         
         # 4. Combine all analyses
+        # Derive soil moisture from weather if available
+        sm = None
+        if weather:
+            precip = weather.get("precipitation_mm", 0)
+            et = weather.get("evapotranspiration_mm", 4)
+            sm = min(0.45, max(0.08, 0.20 + (precip - et) * 0.01))
+        
         analysis = combine_all_analysis(
             indices=indices,
             weather_data=weather,
-            soil_moisture=soil_moisture,
+            soil_moisture=sm,
             sar_moisture=sar_moisture,
             latitude=lat,
             longitude=lng,
@@ -275,7 +282,7 @@ async def schedule_analysis(schedule: ScheduleRequest):
     }
 
 
-@router.get("/dashboard", response_model=DashboardData)
+@router.get("/dashboard")
 async def get_dashboard():
     """Get dashboard overview with stats, recent analyses, and alerts."""
     stats = await get_dashboard_stats()
@@ -300,19 +307,19 @@ async def get_dashboard():
                 "message": f"Field needs attention - health score {score}"
             })
     
-    return DashboardData(
-        total_fields=stats["total_fields"],
-        avg_health_score=stats["avg_health_score"],
-        health_distribution=stats["health_distribution"],
-        recent_analyses=recent[:10],
-        satellite_coverage=get_satellite_info(),
-        weather_summary={
+    return {
+        "total_fields": stats["total_fields"],
+        "avg_health_score": stats["avg_health_score"],
+        "health_distribution": stats["health_distribution"],
+        "recent_analyses": recent[:10],
+        "satellite_coverage": get_satellite_info(),
+        "weather_summary": {
             "source": "NASA POWER + Open-Meteo",
             "last_updated": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
             "forecast_available": True
         },
-        alerts=alerts
-    )
+        "alerts": alerts
+    }
 
 
 @router.get("/report/{field_id}", response_model=DetailedReport)
@@ -452,6 +459,100 @@ async def get_satellite_status():
             "Open-Meteo (Weather forecasts - 3 day outlook)",
             "ISRO Bhoonidhi (Indian remote sensing data - Resourcesat, Cartosat)"
         ]
+    }
+
+
+# ============================================================
+#  DEMO DATA & BACKFILL ENDPOINTS
+# ============================================================
+
+
+@router.get("/data/stats")
+async def get_data_stats():
+    """Get statistics about stored data (demo + real)."""
+    from ..services.supabase_service import get_recent_analyses, list_field_profiles
+    from ..services.demo_data_generator import DEMO_FIELDS, get_demo_field_summary
+    
+    analyses = await get_recent_analyses(limit=10000)
+    profiles = await list_field_profiles(100)
+    
+    # Count by type
+    type_counts = {}
+    for a in analyses:
+        at = a.get("type", a.get("analysis_type", "unknown"))
+        type_counts[at] = type_counts.get(at, 0) + 1
+    
+    # Count demo vs real
+    demo_count = sum(v for k, v in type_counts.items() if "demo" in k)
+    real_count = sum(v for k, v in type_counts.items() if "demo" not in k)
+    
+    return {
+        "total_analyses": len(analyses),
+        "demo_analyses": demo_count,
+        "real_analyses": real_count,
+        "by_type": type_counts,
+        "total_fields": len(profiles),
+        "demo_fields": len(DEMO_FIELDS),
+        "demo_field_summary": get_demo_field_summary(),
+        "oldest_analysis": min((a.get("created_at", "") for a in analyses), default="N/A"),
+        "newest_analysis": max((a.get("created_at", "") for a in analyses), default="N/A")
+    }
+
+
+@router.post("/data/backfill")
+async def backfill_demo_data(days: int = Query(30, ge=1, le=365, description="Number of days of history to generate")):
+    """
+    Backfill historical demo data for Grafana dashboards.
+    Generates analysis points every 6 hours going back N days.
+    
+    Args:
+        days: Number of days of history to generate (1-365, default 30)
+    """
+    from ..services.demo_data_generator import seed_demo_data
+    
+    total = await seed_demo_data(days_back=days, interval_hours=6)
+    
+    return {
+        "success": True,
+        "message": f"Generated {total} historical data points across 8 demo fields ({(days * 4 * 8)} max possible)",
+        "days_backfilled": days,
+        "data_points_generated": total,
+        "fields": 8,
+        "interval_hours": 6,
+        "tip": "Run /api/v1/data/stats to see total counts. Data is available in Grafana PostgreSQL dashboard immediately."
+    }
+
+
+@router.post("/data/backfill/full")
+async def backfill_full_demo_data():
+    """
+    Generate a full 365 days of historical demo data.
+    Useful for showcasing long-term trends in Grafana.
+    """
+    from ..services.demo_data_generator import seed_demo_data
+    
+    total = await seed_demo_data(days_back=365, interval_hours=6)
+    
+    return {
+        "success": True,
+        "message": f"Generated {total} data points across 8 demo fields (365 days of history at 6-hour intervals)",
+        "days_backfilled": 365,
+        "data_points_generated": total
+    }
+
+
+@router.post("/data/tick")
+async def trigger_demo_tick():
+    """
+    Manually trigger a single demo data tick (one new data point per field).
+    Useful for testing before the next scheduled 6-hour auto-tick.
+    """
+    from ..services.demo_data_generator import generate_demo_tick
+    count = await generate_demo_tick()
+    return {
+        "success": True,
+        "message": f"Generated {count} new demo analysis points",
+        "fields_analyzed": count
     }
 
 

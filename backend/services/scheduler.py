@@ -1,6 +1,6 @@
 """
 Krishi Drishti - Automated Scheduler
-Manages periodic satellite data fetching and analysis.
+Manages periodic satellite data fetching and analysis + demo data generation for Grafana.
 Uses APScheduler for background task scheduling.
 """
 import logging
@@ -78,6 +78,38 @@ async def run_scheduled_analysis(latitude: float, longitude: float, field_id: st
         logger.error(f"Error in scheduled analysis for {field_id}: {e}")
 
 
+async def run_demo_data_tick():
+    """
+    Generate new analysis data for all demo fields.
+    Called every 6 hours by the scheduler to build Grafana trend data.
+    """
+    from .demo_data_generator import generate_demo_tick
+    try:
+        count = await generate_demo_tick()
+        logger.info(f"✅ Demo data tick complete: {count} new analyses added")
+    except Exception as e:
+        logger.error(f"❌ Demo data tick failed: {e}")
+
+
+async def seed_initial_demo_data():
+    """
+    Seed database with 60 days of historical demo data on first startup.
+    Runs as a one-time job when the scheduler starts.
+    """
+    from .demo_data_generator import seed_demo_data
+    from .supabase_service import get_recent_analyses
+    
+    # Only seed if database is empty (or just has the initial demo field profiles)
+    recent = await get_recent_analyses(1)
+    if len(recent) > 3:
+        logger.info("Database already has data — skipping initial demo seed")
+        return
+    
+    logger.info("🌱 Seeding 60 days of historical demo data for Grafana dashboards...")
+    total = await seed_demo_data(days_back=60, interval_hours=6)
+    logger.info(f"🌱 Demo data seeded: {total} data points across 8 fields")
+
+
 def start_scheduler():
     """Start the background scheduler for periodic tasks."""
     global _scheduler
@@ -92,7 +124,28 @@ def start_scheduler():
     
     _scheduler = AsyncIOScheduler()
     
-    # Check for due schedules every hour
+    # ===== DEMO DATA: Generate new data every 6 hours =====
+    # This builds up historical trend data for Grafana dashboards.
+    # Produces 8 data points per run (one per demo field).
+    _scheduler.add_job(
+        run_demo_data_tick,
+        trigger="interval",
+        hours=6,
+        id="demo_data_tick",
+        replace_existing=True,
+        next_run_time=datetime.utcnow() + timedelta(hours=6)  # First run in 6 hours
+    )
+    
+    # ===== DEMO DATA: Seed 60 days of history on startup =====
+    _scheduler.add_job(
+        seed_initial_demo_data,
+        trigger="date",
+        run_date=datetime.utcnow() + timedelta(seconds=15),  # Run 15s after startup
+        id="seed_demo_data",
+        replace_existing=True
+    )
+    
+    # ===== USER SCHEDULES: Check for due schedules every hour =====
     _scheduler.add_job(
         _check_due_schedules,
         trigger="interval",
@@ -101,7 +154,7 @@ def start_scheduler():
         replace_existing=True
     )
     
-    # Refresh satellite info daily
+    # ===== SATELLITE STATUS: Log daily =====
     _scheduler.add_job(
         _log_satellite_status,
         trigger="interval",
@@ -112,6 +165,7 @@ def start_scheduler():
     
     _scheduler.start()
     logger.info("Background scheduler started successfully")
+    logger.info("Demo data: seeding 60 days history (15s delay) + new data every 6 hours")
 
 
 async def _check_due_schedules():
