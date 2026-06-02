@@ -82,4 +82,4 @@ We truly appreciate your time and effort.
 
 ---
 
-*Maintained with ❤️ by the Krishi Drishti team*
+*Maintained with ❤️ by Akshit*
