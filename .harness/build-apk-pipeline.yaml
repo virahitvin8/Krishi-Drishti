@@ -1,0 +1,121 @@
+pipeline:
+  name: KrishiDrishti APK Build
+  identifier: krishi_drishti_apk_build
+  projectIdentifier: KrishiDrishti
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.GitHubConnector
+        repoName: virahitvin8/Krishi-Drishti
+        build:
+          type: branch
+          spec:
+            branch: main
+  stages:
+    - stage:
+        name: Build APK
+        identifier: build_apk
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: Cloud
+            spec:
+              connectorRef: account.harnessCloud
+              platform:
+                os: Linux
+                arch: Amd64
+              runtime:
+                type: Cloud
+                spec:
+                  resources:
+                    memory: 4Gi
+                    cpu: 2
+          execution:
+            steps:
+              - step:
+                  type: Action
+                  name: Setup Java 17
+                  identifier: setup_java
+                  spec:
+                    uses: actions/setup-java@v4
+                    with:
+                      java-version: "17"
+                      distribution: temurin
+
+              - step:
+                  type: Run
+                  name: Install Android SDK & NDK
+                  identifier: install_android_sdk
+                  spec:
+                    shell: Sh
+                    command: |-
+                      yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358" || echo "SDK components installed"
+
+              - step:
+                  type: Action
+                  name: Setup Flutter
+                  identifier: setup_flutter
+                  spec:
+                    uses: subosito/flutter-action@v2
+                    with:
+                      flutter-version: "3.44.1"
+                      channel: stable
+                      cache: true
+
+              - step:
+                  type: Run
+                  name: Get Dependencies
+                  identifier: get_dependencies
+                  spec:
+                    shell: Sh
+                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
+                    command: flutter pub get
+
+              - step:
+                  type: Run
+                  name: Flutter Analyze
+                  identifier: flutter_analyze
+                  spec:
+                    shell: Sh
+                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
+                    command: flutter analyze
+
+              - step:
+                  type: Run
+                  name: Build Debug APK
+                  identifier: build_debug_apk
+                  spec:
+                    shell: Sh
+                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
+                    command: flutter build apk --debug
+
+              - step:
+                  type: Run
+                  name: Rename & Prepare APK
+                  identifier: prepare_apk
+                  spec:
+                    shell: Sh
+                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
+                    command: |-
+                      cp build/app/outputs/flutter-apk/app-debug.apk \
+                         ../../krishi-drishti-debug.apk
+
+              - step:
+                  type: Artifact
+                  name: Upload APK
+                  identifier: upload_apk
+                  spec:
+                    storeType: Harness
+                    paths:
+                      - krishi-drishti-debug.apk
+
+        variables:
+          - name: ANDROID_HOME
+            type: String
+            value: /usr/local/lib/android/sdk
+          - name: ANDROID_SDK_ROOT
+            type: String
+            value: /usr/local/lib/android/sdk
