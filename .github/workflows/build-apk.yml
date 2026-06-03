@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'Build type'
+        description: 'Build type (debug or release)'
         required: true
         default: 'debug'
         type: choice
@@ -17,17 +17,20 @@ on:
           - debug
           - release
 
+env:
+  FLUTTER_VERSION: '3.44.1'
+  NDK_VERSION: '28.2.13676358'
+
 jobs:
-  build:
-    name: Build Flutter APK
+  analyze:
+    name: Flutter Analyze
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: KrishiDrishti_Final_v4/flutter_app
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -38,28 +41,75 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.1'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
 
-      - name: Install Flutter dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify Flutter analyze
+      - name: Run analyze
         run: flutter analyze
+
+  build:
+    name: Build APK
+    needs: analyze
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: KrishiDrishti_Final_v4/flutter_app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk;${{ env.NDK_VERSION }}" || \
+          echo "NDK may already be installed, continuing..."
+
+      - name: Determine build type
+        id: build_type
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "build_type=release" >> $GITHUB_OUTPUT
+          else
+            echo "build_type=${{ github.event.inputs.build_type || 'debug' }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build APK
-        run: flutter build apk --${{ github.event.inputs.build_type || 'debug' }}
+        run: flutter build apk --${{ steps.build_type.outputs.build_type }}
+
+      - name: Rename APK for artifact
+        run: |
+          mkdir -p ../../apk-artifacts
+          cp build/app/outputs/flutter-apk/app-${{ steps.build_type.outputs.build_type }}.apk \
+             ../../apk-artifacts/krishi-drishti-${{ steps.build_type.outputs.build_type }}.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: krishi-drishti-${{ github.event.inputs.build_type || 'debug' }}-apk
-          path: KrishiDrishti_Final_v4/flutter_app/build/app/outputs/flutter-apk/*.apk
-          retention-days: 30
+          name: krishi-drishti-apk
+          path: apk-artifacts/*.apk
+          retention-days: 60
 
   release:
     name: Create GitHub Release
@@ -68,29 +118,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download APK artifact
+      - name: Download APK
         uses: actions/download-artifact@v4
         with:
-          name: krishi-drishti-release-apk
+          name: krishi-drishti-apk
           path: ./apk
 
       - name: Generate release notes
-        id: release_notes
         run: |
-          echo "## KrishiDrishti APK Release" > release_notes.md
-          echo "" >> release_notes.md
-          echo "### Changes in this release" >> release_notes.md
-          echo "- Automated build from commit \`${{ github.sha }}\`" >> release_notes.md
-          echo "- Build date: $(date -u '+%Y-%m-%d %H:%M UTC')" >> release_notes.md
+          cat > release_notes.md << 'EOF'
+          ## KrishiDrishti APK Release
+
+          ### Changes in this release
+          - Automated CI build from commit ${{ github.sha }}
+          - Build date: $(date -u '+%Y-%m-%d %H:%M UTC')
+          EOF
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           name: KrishiDrishti ${{ github.ref_name }}
           body_path: release_notes.md
-          files: |
-            apk/app-debug.apk
-            apk/app-release.apk
+          files: apk/*.apk
           draft: false
           prerelease: false
         env:
