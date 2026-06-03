@@ -77,9 +77,12 @@ def _init_gee_sync() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# GEE collection identifiers (all FREE — verified May 2026)
+# GEE collection identifiers (all FREE)
 # ---------------------------------------------------------------------------
 S2_COLLECTION = "COPERNICUS/S2_SR_HARMONIZED"
+# Landsat 8 & 9 — 30m optical, longest continuous record (1982–present)
+LANDSAT8_COLLECTION = "LANDSAT/LC08/C02/T1_L2"
+LANDSAT9_COLLECTION = "LANDSAT/LC09/C02/T1_L2"
 S3_OLCI_COLLECTION = "COPERNICUS/S3/OLCI"
 S3_SLSTR_COLLECTION = "COPERNICUS/S3/SLSTR"
 SMAP_COLLECTION = "NASA_USDA/HSL/SMAP10KM_soil_moisture"
@@ -133,6 +136,7 @@ def _fetch_all_sync(lat: float, lng: float, area_size: float) -> Dict[str, Any]:
 
     # Run all queries — individual failures are caught & logged
     queries = [
+        ("landsat", _query_landsat, (point, region)),
         ("sentinel2", _query_s2, (point, region)),
         ("sentinel3_lst", _query_s3_lst, (point, region)),
         ("sentinel3_chl", _query_s3_chlorophyll, (point, region)),
@@ -158,6 +162,82 @@ def _fetch_all_sync(lat: float, lng: float, area_size: float) -> Dict[str, Any]:
 # ===================================================================
 # INDIVIDUAL QUERIES  (synchronous, called from _fetch_all_sync)
 # ===================================================================
+
+def _query_landsat(point, region) -> Optional[Dict[str, float]]:
+    """Landsat 8 & 9 — vegetation indices (30m, longest climate record)."""
+    # Try Landsat 9 first (newer), fall back to Landsat 8
+    l9 = (
+        ee.ImageCollection(LANDSAT9_COLLECTION)
+        .filterBounds(point)
+        .filterDate(
+            (datetime.utcnow() - timedelta(days=60)).strftime("%Y-%m-%d"),
+            datetime.utcnow().strftime("%Y-%m-%d"),
+        )
+        .sort("CLOUD_COVER", True)
+        .first()
+    )
+
+    # Function to compute indices from a Landsat image
+    def _landsat_indices(img):
+        ndvi = img.normalizedDifference(["SR_B5", "SR_B4"]).rename("ndvi")  # NIR, Red
+        evi = img.expression(
+            "2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))",
+            {"NIR": img.select("SR_B5"), "RED": img.select("SR_B4"), "BLUE": img.select("SR_B2")},
+        ).rename("evi")
+        ndwi = img.normalizedDifference(["SR_B3", "SR_B6"]).rename("ndwi")  # Green, SWIR1
+        savi = img.expression(
+            "((NIR - RED) / (NIR + RED + 0.5)) * 1.5",
+            {"NIR": img.select("SR_B5"), "RED": img.select("SR_B4")},
+        ).rename("savi")
+        return ndvi.addBands(evi).addBands(ndwi).addBands(savi)
+
+    # Check if L9 has data
+    try:
+        l9_data = l9.getInfo()
+        if l9_data and l9_data.get("properties"):
+            image = l9
+            source = "Landsat 9 (GEE)"
+        else:
+            # Fall back to Landsat 8
+            image = (
+                ee.ImageCollection(LANDSAT8_COLLECTION)
+                .filterBounds(point)
+                .filterDate(
+                    (datetime.utcnow() - timedelta(days=60)).strftime("%Y-%m-%d"),
+                    datetime.utcnow().strftime("%Y-%m-%d"),
+                )
+                .sort("CLOUD_COVER", True)
+                .first()
+            )
+            source = "Landsat 8 (GEE)"
+    except Exception:
+        image = (
+            ee.ImageCollection(LANDSAT8_COLLECTION)
+            .filterBounds(point)
+            .filterDate(
+                (datetime.utcnow() - timedelta(days=60)).strftime("%Y-%m-%d"),
+                datetime.utcnow().strftime("%Y-%m-%d"),
+            )
+            .sort("CLOUD_COVER", True)
+            .first()
+        )
+        source = "Landsat 8 (GEE)"
+
+    combined = _landsat_indices(image)
+    stats = combined.reduceRegion(
+        reducer=ee.Reducer.mean(), geometry=region, scale=30, bestEffort=True
+    ).getInfo()
+
+    if not stats or all(v is None for v in stats.values()):
+        return None
+
+    return {
+        "ndvi": round(stats.get("ndvi", 0) or 0, 4),
+        "evi": round(stats.get("evi", 0) or 0, 4),
+        "ndwi": round(stats.get("ndwi", 0) or 0, 4),
+        "savi": round(stats.get("savi", 0) or 0, 4),
+        "source": source,
+    }
 
 def _query_s2(point, region) -> Optional[Dict[str, float]]:
     """Sentinel-2 vegetation indices."""
