@@ -1,0 +1,428 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1800" viewBox="0 0 1200 1800">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0a"/>
+      <stop offset="100%" stop-color="#0d2818"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2E7D32"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1976D2"/>
+      <stop offset="100%" stop-color="#0D47A1"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F9A825"/>
+      <stop offset="100%" stop-color="#F57F17"/>
+    </linearGradient>
+    
+    <!-- Satellite orbit animation -->
+    <animateTransform id="orbit1" attributeName="transform" type="rotate" from="0 150 100" to="360 150 100" dur="12s" repeatCount="indefinite"/>
+    <animateTransform id="orbit2" attributeName="transform" type="rotate" from="0 150 100" to="-360 150 100" dur="15s" repeatCount="indefinite"/>
+
+    <!-- Pulse animation -->
+    <style>
+      @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes slideLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+      @keyframes slideRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+      @keyframes dataFlow { 0% { stroke-dashoffset: 100; } 100% { stroke-dashoffset: 0; } }
+      @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 5px #4ADE80); } 50% { filter: drop-shadow(0 0 15px #4ADE80); } }
+      .pulse { animation: pulse 3s ease-in-out infinite; }
+      .fadeIn { animation: fadeIn 0.8s ease forwards; }
+      .slideLeft { animation: slideLeft 1s ease forwards; }
+      .slideRight { animation: slideRight 1s ease forwards; }
+      .data-flow { stroke-dasharray: 100; animation: dataFlow 2s linear infinite; }
+      .glow { animation: glow 2s ease-in-out infinite; }
+      .delay-1 { animation-delay: 0.2s; }
+      .delay-2 { animation-delay: 0.4s; }
+      .delay-3 { animation-delay: 0.6s; }
+      .delay-4 { animation-delay: 0.8s; }
+      .delay-5 { animation-delay: 1.0s; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="1800" fill="url(#bgGrad)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="600" x2="1200" y2="600" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="800" x2="1200" y2="800" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="1000" x2="1200" y2="1000" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="1200" x2="1200" y2="1200" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="1400" x2="1200" y2="1400" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="1600" x2="1200" y2="1600" stroke="white" stroke-width="0.5"/>
+    <line x1="300" y1="0" x2="300" y2="1800" stroke="white" stroke-width="0.5"/>
+    <line x1="600" y1="0" x2="600" y2="1800" stroke="white" stroke-width="0.5"/>
+    <line x1="900" y1="0" x2="900" y2="1800" stroke="white" stroke-width="0.5"/>
+  </g>
+
+  <!-- ============================== -->
+  <!-- HEADER -->
+  <!-- ============================== -->
+  <rect x="50" y="30" width="1100" height="100" rx="20" fill="#0D2818" stroke="#2E7D32" stroke-width="2" opacity="0.9" class="glow"/>
+  <text x="600" y="72" font-family="system-ui, sans-serif" font-size="36" font-weight="800" fill="white" text-anchor="middle">Krishi Drishti App Workflow</text>
+  <text x="600" y="106" font-family="system-ui, sans-serif" font-size="16" fill="#4ADE80" text-anchor="middle">From Satellite to Farmer — Complete Data Flow 🛰️🌾</text>
+
+  <!-- ============================== -->
+  <!-- STEP 1: SATELLITE SOURCES -->
+  <!-- ============================== -->
+  <g>
+    <rect x="60" y="160" width="1080" height="40" rx="10" fill="#0D2818" stroke="#1976D2" stroke-width="1.5"/>
+    <text x="600" y="186" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#60A5FA" text-anchor="middle">① DATA SOURCES — Satellites & Weather APIs</text>
+  </g>
+
+  <!-- Satellite orbit visualization -->
+  <g transform="translate(150, 260)">
+    <ellipse cx="0" cy="0" rx="90" ry="30" fill="none" stroke="#1976D2" stroke-width="1.5" stroke-dasharray="4 6"/>
+    <!-- Animated satellite -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="10s" repeatCount="indefinite"/>
+      <rect x="80" y="-10" width="16" height="10" rx="2" fill="#1976D2"/>
+      <rect x="86" y="-18" width="4" height="12" rx="1" fill="#1976D2"/>
+      <rect x="86" y="2" width="4" height="12" rx="1" fill="#1976D2"/>
+    </g>
+    <text x="0" y="50" font-family="system-ui, sans-serif" font-size="11" fill="#71717A" text-anchor="middle">Sentinel-2 A/B</text>
+    <text x="0" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#52525B" text-anchor="middle">10m • 5-day revisit</text>
+  </g>
+
+  <!-- Satellite boxes -->
+  <g>
+    <!-- Sentinel-2 -->
+    <rect x="310" y="220" width="170" height="90" rx="12" fill="#18181B" stroke="#2E7D32" stroke-width="1.5" class="fadeIn delay-1"/>
+    <text x="395" y="248" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#4ADE80" text-anchor="middle">🛰️ Sentinel-2</text>
+    <text x="395" y="268" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">NDVI • EVI • NDWI</text>
+    <text x="395" y="284" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">REIP • SAVI • GNDVI</text>
+    <text x="395" y="300" font-family="system-ui, sans-serif" font-size="8" fill="#52525B" text-anchor="middle">10m • 5-day • ESA</text>
+
+    <!-- Sentinel-1 SAR -->
+    <rect x="500" y="220" width="170" height="90" rx="12" fill="#18181B" stroke="#1976D2" stroke-width="1.5" class="fadeIn delay-2"/>
+    <text x="585" y="248" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#60A5FA" text-anchor="middle">📡 Sentinel-1 SAR</text>
+    <text x="585" y="268" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Soil Moisture</text>
+    <text x="585" y="284" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Flood Detection</text>
+    <text x="585" y="300" font-family="system-ui, sans-serif" font-size="8" fill="#52525B" text-anchor="middle">10m • 6-day • ESA</text>
+
+    <!-- Landsat -->
+    <rect x="690" y="220" width="170" height="90" rx="12" fill="#18181B" stroke="#F9A825" stroke-width="1.5" class="fadeIn delay-3"/>
+    <text x="775" y="248" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#FBBF24" text-anchor="middle">🌍 Landsat 8/9</text>
+    <text x="775" y="268" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Long-term Trends</text>
+    <text x="775" y="284" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Vegetation History</text>
+    <text x="775" y="300" font-family="system-ui, sans-serif" font-size="8" fill="#52525B" text-anchor="middle">30m • 8-day • NASA</text>
+
+    <!-- Weather -->
+    <rect x="880" y="220" width="170" height="90" rx="12" fill="#18181B" stroke="#E74C3C" stroke-width="1.5" class="fadeIn delay-4"/>
+    <text x="965" y="248" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#EF4444" text-anchor="middle">🌤️ Weather APIs</text>
+    <text x="965" y="268" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">NASA POWER</text>
+    <text x="965" y="284" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Open-Meteo</text>
+    <text x="965" y="300" font-family="system-ui, sans-serif" font-size="8" fill="#52525B" text-anchor="middle">Free • 5km</text>
+  </g>
+
+  <!-- Data flow arrows from satellites -->
+  <line x1="395" y1="310" x2="395" y2="360" stroke="#4ADE80" stroke-width="2" class="data-flow"/>
+  <line x1="585" y1="310" x2="585" y2="360" stroke="#60A5FA" stroke-width="2" class="data-flow"/>
+  <line x1="775" y1="310" x2="775" y2="360" stroke="#FBBF24" stroke-width="2" class="data-flow"/>
+  <line x1="965" y1="310" x2="965" y2="360" stroke="#EF4444" stroke-width="2" class="data-flow"/>
+
+  <!-- ============================== -->
+  <!-- STEP 2: BACKEND PROCESSING -->
+  <!-- ============================== -->
+  <g>
+    <rect x="60" y="360" width="1080" height="40" rx="10" fill="#0D2818" stroke="#2E7D32" stroke-width="1.5"/>
+    <text x="600" y="386" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#4ADE80" text-anchor="middle">② BACKEND PROCESSING — FastAPI + Python Analysis Engine</text>
+  </g>
+
+  <!-- Backend processing boxes -->
+  <g>
+    <!-- Analysis Engine -->
+    <rect x="80" y="420" width="240" height="120" rx="14" fill="#18181B" stroke="#2E7D32" stroke-width="2"/>
+    <text x="200" y="448" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#4ADE80" text-anchor="middle">🧠 Analysis Engine</text>
+    <text x="200" y="470" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">NDVI computation</text>
+    <text x="200" y="486" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">EVI • NDWI • REIP</text>
+    <text x="200" y="502" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">SAVI • GNDVI</text>
+    <text x="200" y="520" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Pest Risk Scoring</text>
+
+    <!-- Weather Service -->
+    <rect x="340" y="420" width="240" height="120" rx="14" fill="#18181B" stroke="#1976D2" stroke-width="2"/>
+    <text x="460" y="448" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#60A5FA" text-anchor="middle">🌤️ Weather Service</text>
+    <text x="460" y="470" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">NASA POWER</text>
+    <text x="460" y="486" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Open-Meteo 3-day</text>
+    <text x="460" y="502" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Evapotranspiration</text>
+
+    <!-- CDSE Integration -->
+    <rect x="600" y="420" width="240" height="120" rx="14" fill="#18181B" stroke="#F9A825" stroke-width="2"/>
+    <text x="720" y="448" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#FBBF24" text-anchor="middle">🛰️ CDSE Integration</text>
+    <text x="720" y="470" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Copernicus Data Space</text>
+    <text x="720" y="486" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Sentinel imagery fetch</text>
+    <text x="720" y="502" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Band processing</text>
+
+    <!-- Database -->
+    <rect x="860" y="420" width="240" height="120" rx="14" fill="#18181B" stroke="#3ECF8E" stroke-width="2"/>
+    <text x="980" y="448" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#3ECF8E" text-anchor="middle">🗄️ Storage</text>
+    <text x="980" y="470" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Supabase PostgreSQL</text>
+    <text x="980" y="486" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">User profiles</text>
+    <text x="980" y="502" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Saved farms</text>
+    <text x="980" y="520" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA" text-anchor="middle">Analysis history</text>
+  </g>
+
+  <!-- Arrow down -->
+  <path d="M600 545 L600 580" stroke="#4ADE80" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- ============================== -->
+  <!-- STEP 3: APP UI -->
+  <!-- ============================== -->
+  <g>
+    <rect x="60" y="580" width="1080" height="40" rx="10" fill="#0D2818" stroke="#2E7D32" stroke-width="1.5"/>
+    <text x="600" y="606" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#4ADE80" text-anchor="middle">③ USER INTERFACE — Web PWA + Flutter App</text>
+  </g>
+
+  <!-- Phone mockup - main dashboard -->
+  <g transform="translate(80, 640)">
+    <!-- Phone body -->
+    <rect x="0" y="0" width="280" height="520" rx="30" fill="#18181B" stroke="#27272A" stroke-width="3"/>
+    <rect x="5" y="5" width="270" height="510" rx="27" fill="#09090B"/>
+    
+    <!-- Status bar -->
+    <circle cx="140" cy="18" r="4" fill="#27272A"/>
+    
+    <!-- Health Score -->
+    <rect x="10" y="30" width="250" height="70" rx="10" fill="#0D2818" stroke="#2E7D32" stroke-width="1"/>
+    <text x="140" y="52" font-family="system-ui, sans-serif" font-size="8" fill="#71717A" text-anchor="middle">OVERALL CROP HEALTH</text>
+    <text x="100" y="82" font-family="system-ui, sans-serif" font-size="28" font-weight="bold" fill="#4ADE80" text-anchor="end">78</text>
+    <text x="110" y="78" font-family="system-ui, sans-serif" font-size="12" fill="#4ADE80" font-weight="600">Moderate</text>
+    
+    <!-- Metrics grid -->
+    <g>
+      <rect x="10" y="112" width="78" height="56" rx="8" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+      <text x="49" y="130" font-family="system-ui, sans-serif" font-size="8" fill="#71717A" text-anchor="middle">NDVI</text>
+      <text x="49" y="155" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4ADE80" text-anchor="middle">48%</text>
+      
+      <rect x="96" y="112" width="78" height="56" rx="8" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+      <text x="135" y="130" font-family="system-ui, sans-serif" font-size="8" fill="#71717A" text-anchor="middle">EVI</text>
+      <text x="135" y="155" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#4ADE80" text-anchor="middle">51%</text>
+      
+      <rect x="182" y="112" width="78" height="56" rx="8" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+      <text x="221" y="130" font-family="system-ui, sans-serif" font-size="8" fill="#71717A" text-anchor="middle">NDWI</text>
+      <text x="221" y="155" font-family="system-ui, sans-serif" font-size="18" font-weight="bold" fill="#60A5FA" text-anchor="middle">31%</text>
+    </g>
+    
+    <!-- Map preview -->
+    <rect x="10" y="178" width="250" height="140" rx="10" fill="#1a1a2e" stroke="#27272A" stroke-width="1"/>
+    <text x="135" y="228" font-family="system-ui, sans-serif" font-size="9" fill="#52525B" text-anchor="middle">🗺️ Interactive Map</text>
+    <text x="135" y="244" font-family="system-ui, sans-serif" font-size="7" fill="#52525B" text-anchor="middle">OpenStreetMap + Hotspot Grid</text>
+    
+    <!-- Hotspot grid mini preview -->
+    <g transform="translate(60, 258)" opacity="0.6">
+      <rect x="0" y="0" width="18" height="18" rx="2" fill="#2ECC71" opacity="0.6"/>
+      <rect x="20" y="0" width="18" height="18" rx="2" fill="#4ADE80" opacity="0.5"/>
+      <rect x="40" y="0" width="18" height="18" rx="2" fill="#E74C3C" opacity="0.4"/>
+      <rect x="60" y="0" width="18" height="18" rx="2" fill="#2ECC71" opacity="0.6"/>
+      <rect x="80" y="0" width="18" height="18" rx="2" fill="#60A5FA" opacity="0.5"/>
+      <rect x="0" y="20" width="18" height="18" rx="2" fill="#60A5FA" opacity="0.5"/>
+      <rect x="20" y="20" width="18" height="18" rx="2" fill="#2ECC71" opacity="0.7"/>
+      <rect x="40" y="20" width="18" height="18" rx="2" fill="#E74C3C" opacity="0.3"/>
+      <rect x="60" y="20" width="18" height="18" rx="2" fill="#F9A825" opacity="0.5"/>
+      <rect x="80" y="20" width="18" height="18" rx="2" fill="#2ECC71" opacity="0.6"/>
+    </g>
+    
+    <!-- Pest & Drainage -->
+    <rect x="10" y="328" width="120" height="50" rx="8" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="70" y="346" font-family="system-ui, sans-serif" font-size="8" fill="#71717A" text-anchor="middle">🐛 Pest Risk</text>
+    <text x="35" y="368" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#FBBF24">28</text>
+    <text x="55" y="368" font-family="system-ui, sans-serif" font-size="8" fill="#52525B">/100</text>
+    
+    <rect x="140" y="328" width="120" height="50" rx="8" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="200" y="346" font-family="system-ui, sans-serif" font-size="8" fill="#71717A" text-anchor="middle">🌊 Drainage</text>
+    <text x="165" y="368" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#60A5FA">72</text>
+    <text x="185" y="368" font-family="system-ui, sans-serif" font-size="8" fill="#52525B">/100</text>
+    
+    <!-- Bottom nav -->
+    <rect x="10" y="390" width="250" height="36" rx="18" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="35" y="413" font-family="system-ui, sans-serif" font-size="10" fill="#4ADE80">🏠</text>
+    <text x="75" y="413" font-family="system-ui, sans-serif" font-size="10" fill="#52525B">🗺️</text>
+    <text x="115" y="413" font-family="system-ui, sans-serif" font-size="10" fill="#52525B">🔧</text>
+    <text x="155" y="413" font-family="system-ui, sans-serif" font-size="10" fill="#52525B">📂</text>
+    <text x="195" y="413" font-family="system-ui, sans-serif" font-size="10" fill="#52525B">⚙️</text>
+
+    <!-- Weather card -->
+    <rect x="10" y="440" width="250" height="60" rx="8" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="20" y="458" font-family="system-ui, sans-serif" font-size="8" fill="#71717A">🌤️ Weather</text>
+    <text x="20" y="478" font-family="system-ui, sans-serif" font-size="9" fill="#A1A1AA">33.2°C • 64% humidity</text>
+    <text x="20" y="492" font-family="system-ui, sans-serif" font-size="8" fill="#52525B">Wind: 14 km/h • Rain: 12mm</text>
+    
+    <!-- Label -->
+    <text x="140" y="515" font-family="system-ui, sans-serif" font-size="8" fill="#2E7D32" text-anchor="middle">📱 Flutter Mobile App</text>
+  </g>
+
+  <!-- Second phone mockup - Report -->
+  <g transform="translate(460, 640)">
+    <rect x="0" y="0" width="280" height="520" rx="30" fill="#18181B" stroke="#27272A" stroke-width="3"/>
+    <rect x="5" y="5" width="270" height="510" rx="27" fill="#09090B"/>
+    <circle cx="140" cy="18" r="4" fill="#27272A"/>
+    
+    <!-- Report header -->
+    <text x="140" y="42" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="white" text-anchor="middle">📊 Full Report</text>
+    
+    <!-- Satellite sources -->
+    <rect x="10" y="55" width="250" height="80" rx="8" fill="#18181B" stroke="#2E7D32" stroke-width="1"/>
+    <text x="20" y="72" font-family="system-ui, sans-serif" font-size="9" font-weight="bold" fill="#4ADE80">🛰️ Sentinel-2</text>
+    <text x="20" y="88" font-family="system-ui, sans-serif" font-size="8" fill="#A1A1AA">NDVI 48% • EVI 51% • NDWI 31%</text>
+    <text x="20" y="102" font-family="system-ui, sans-serif" font-size="7" fill="#52525B">10m resolution • L2A</text>
+    <text x="20" y="116" font-family="system-ui, sans-serif" font-size="7" fill="#52525B">REIP 32% • SAVI 35% • GNDVI 44%</text>
+    
+    <rect x="10" y="145" width="120" height="65" rx="8" fill="#18181B" stroke="#FBBF24" stroke-width="1"/>
+    <text x="70" y="162" font-family="system-ui, sans-serif" font-size="8" font-weight="bold" fill="#FBBF24" text-anchor="middle">📡 Sentinel-1 SAR</text>
+    <text x="70" y="178" font-family="system-ui, sans-serif" font-size="7" fill="#A1A1AA" text-anchor="middle">Soil moisture: 0.34</text>
+    <text x="70" y="192" font-family="system-ui, sans-serif" font-size="7" fill="#52525B" text-anchor="middle">No flooding detected</text>
+    
+    <rect x="140" y="145" width="120" height="65" rx="8" fill="#18181B" stroke="#60A5FA" stroke-width="1"/>
+    <text x="200" y="162" font-family="system-ui, sans-serif" font-size="8" font-weight="bold" fill="#60A5FA" text-anchor="middle">🌍 Landsat</text>
+    <text x="200" y="178" font-family="system-ui, sans-serif" font-size="7" fill="#A1A1AA" text-anchor="middle">Trend +8%</text>
+    <text x="200" y="192" font-family="system-ui, sans-serif" font-size="7" fill="#52525B" text-anchor="middle">Slope 2.1%</text>
+    
+    <!-- Pest Risk highlighted -->
+    <rect x="10" y="220" width="250" height="55" rx="8" fill="#18181B" stroke="#EF4444" stroke-width="1"/>
+    <text x="20" y="238" font-family="system-ui, sans-serif" font-size="9" font-weight="bold" fill="#EF4444">🐛 Pest Risk Score: 28/100</text>
+    <text x="20" y="254" font-family="system-ui, sans-serif" font-size="8" fill="#A1A1AA">Low to moderate risk</text>
+    <text x="20" y="268" font-family="system-ui, sans-serif" font-size="7" fill="#52525B">Monitor REIP-stressed cells</text>
+    
+    <!-- Recommendations -->
+    <rect x="10" y="285" width="250" height="100" rx="8" fill="#18181B" stroke="#2E7D32" stroke-width="1"/>
+    <text x="20" y="303" font-family="system-ui, sans-serif" font-size="9" font-weight="bold" fill="#4ADE80">📋 Recommendations</text>
+    <text x="20" y="322" font-family="system-ui, sans-serif" font-size="8" fill="#A1A1AA">• 💧 Maintain irrigation schedule</text>
+    <text x="20" y="338" font-family="system-ui, sans-serif" font-size="8" fill="#A1A1AA">• 🌿 Fertilize low-NDVI zones</text>
+    <text x="20" y="354" font-family="system-ui, sans-serif" font-size="8" fill="#A1A1AA">• 📊 Next satellite pass ~3 days</text>
+    <text x="20" y="370" font-family="system-ui, sans-serif" font-size="8" fill="#A1A1AA">• 🐛 Monitor pest risk weekly</text>
+    
+    <!-- Actions -->
+    <rect x="10" y="395" width="250" height="35" rx="17" fill="#2E7D32"/>
+    <text x="135" y="417" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">📥 Save Farm</text>
+    
+    <text x="140" y="468" font-family="system-ui, sans-serif" font-size="8" fill="#2E7D32" text-anchor="middle">🌐 Web PWA App</text>
+  </g>
+
+  <!-- Third phone mockup - Settings -->
+  <g transform="translate(840, 640)">
+    <rect x="0" y="0" width="280" height="520" rx="30" fill="#18181B" stroke="#27272A" stroke-width="3"/>
+    <rect x="5" y="5" width="270" height="510" rx="27" fill="#09090B"/>
+    <circle cx="140" cy="18" r="4" fill="#27272A"/>
+    
+    <text x="140" y="42" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="white" text-anchor="middle">⚙️ Settings</text>
+    
+    <!-- Profile -->
+    <rect x="10" y="55" width="250" height="130" rx="10" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="20" y="75" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#4ADE80">👤 Profile</text>
+    <rect x="20" y="85" width="100" height="24" rx="6" fill="#27272A"/>
+    <text x="30" y="102" font-family="system-ui, sans-serif" font-size="8" fill="#71717A">Your Name</text>
+    <rect x="130" y="85" width="120" height="24" rx="6" fill="#27272A"/>
+    <text x="140" y="102" font-family="system-ui, sans-serif" font-size="8" fill="#71717A">Language</text>
+    <rect x="20" y="115" width="230" height="24" rx="6" fill="#27272A"/>
+    <text x="30" y="132" font-family="system-ui, sans-serif" font-size="8" fill="#71717A">Select your state</text>
+    <rect x="20" y="148" width="230" height="24" rx="12" fill="#2E7D32"/>
+    <text x="135" y="164" font-family="system-ui, sans-serif" font-size="9" font-weight="bold" fill="white" text-anchor="middle">Save Settings</text>
+    
+    <!-- Data Preferences -->
+    <rect x="10" y="195" width="250" height="100" rx="10" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="20" y="215" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#60A5FA">📡 Data Preferences</text>
+    <rect x="20" y="228" width="12" height="12" rx="3" fill="#2E7D32"/>
+    <text x="38" y="239" font-family="system-ui, sans-serif" font-size="8" fill="#D4D4D8">Auto-refresh every 7 days</text>
+    <rect x="20" y="248" width="12" height="12" rx="3" fill="#2E7D32"/>
+    <text x="38" y="259" font-family="system-ui, sans-serif" font-size="8" fill="#D4D4D8">Notify on new data</text>
+    <rect x="20" y="268" width="12" height="12" rx="3" fill="#2E7D32"/>
+    <text x="38" y="279" font-family="system-ui, sans-serif" font-size="8" fill="#D4D4D8">Save analysis history</text>
+    
+    <!-- Account -->
+    <rect x="10" y="305" width="250" height="65" rx="10" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="20" y="325" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#FBBF24">🔐 Account</text>
+    <text x="20" y="345" font-family="system-ui, sans-serif" font-size="8" fill="#52525B">App v4.0 • Jai Kisan 🌾</text>
+    
+    <!-- Quick Actions -->
+    <rect x="10" y="385" width="250" height="100" rx="10" fill="#18181B" stroke="#27272A" stroke-width="1"/>
+    <text x="20" y="405" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="white">⚡ Quick Actions</text>
+    <rect x="15" y="415" width="115" height="30" rx="15" fill="#2E7D32"/>
+    <text x="72" y="435" font-family="system-ui, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle">📄 Upload CSV</text>
+    <rect x="140" y="415" width="115" height="30" rx="15" fill="#1976D2"/>
+    <text x="197" y="435" font-family="system-ui, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle">🛰️ Satellites</text>
+    <rect x="15" y="452" width="115" height="24" rx="12" fill="#18181B" stroke="#FBBF24" stroke-width="1"/>
+    <text x="72" y="469" font-family="system-ui, sans-serif" font-size="8" fill="#FBBF24" text-anchor="middle">🐛 Pest Info</text>
+    <rect x="140" y="452" width="115" height="24" rx="12" fill="#18181B" stroke="#60A5FA" stroke-width="1"/>
+    <text x="197" y="469" font-family="system-ui, sans-serif" font-size="8" fill="#60A5FA" text-anchor="middle">📈 Grafana</text>
+    
+    <text x="140" y="510" font-family="system-ui, sans-serif" font-size="8" fill="#2E7D32" text-anchor="middle">⚙️ Settings & Configuration</text>
+  </g>
+
+  <!-- ============================== -->
+  <!-- STEP 4: DEPLOYMENT -->
+  <!-- ============================== -->
+  <path d="M200 1170 L200 1210" stroke="#4ADE80" stroke-width="2" class="data-flow"/>
+  <path d="M600 1170 L600 1210" stroke="#4ADE80" stroke-width="2" class="data-flow"/>
+  <path d="M1000 1170 L1000 1210" stroke="#4ADE80" stroke-width="2" class="data-flow"/>
+
+  <g>
+    <rect x="120" y="1210" width="240" height="50" rx="12" fill="#0D2818" stroke="#00C7B7" stroke-width="1.5"/>
+    <text x="240" y="1235" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#00C7B7" text-anchor="middle">🌐 Netlify</text>
+    <text x="240" y="1250" font-family="system-ui, sans-serif" font-size="9" fill="#71717A" text-anchor="middle">Frontend PWA Hosting</text>
+    
+    <rect x="480" y="1210" width="240" height="50" rx="12" fill="#0D2818" stroke="#46E3B7" stroke-width="1.5"/>
+    <text x="600" y="1235" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#46E3B7" text-anchor="middle">🖥️ Render</text>
+    <text x="600" y="1250" font-family="system-ui, sans-serif" font-size="9" fill="#71717A" text-anchor="middle">Backend API Hosting</text>
+    
+    <rect x="840" y="1210" width="240" height="50" rx="12" fill="#0D2818" stroke="#2E7D32" stroke-width="1.5"/>
+    <text x="960" y="1235" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#4ADE80" text-anchor="middle">🤖 GitHub Actions</text>
+    <text x="960" y="1250" font-family="system-ui, sans-serif" font-size="9" fill="#71717A" text-anchor="middle">CI/CD APK Build</text>
+  </g>
+
+  <!-- ============================== -->
+  <!-- FOOTER -->
+  <!-- ============================== -->
+  <path d="M600 1270 L600 1310" stroke="#4ADE80" stroke-width="2" class="data-flow"/>
+
+  <!-- Legend -->
+  <g transform="translate(120, 1330)">
+    <rect x="0" y="0" width="960" height="60" rx="14" fill="#0D2818" stroke="#2E7D32" stroke-width="1"/>
+    <rect x="20" y="20" width="14" height="14" rx="3" fill="#2ECC71" opacity="0.7"/>
+    <text x="40" y="32" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA">Healthy</text>
+    <rect x="110" y="20" width="14" height="14" rx="3" fill="#E74C3C" opacity="0.5"/>
+    <text x="130" y="32" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA">Stressed</text>
+    <rect x="210" y="20" width="14" height="14" rx="3" fill="#F9A825" opacity="0.6"/>
+    <text x="230" y="32" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA">Monitor</text>
+    <rect x="320" y="20" width="14" height="14" rx="3" fill="#60A5FA" opacity="0.6"/>
+    <text x="340" y="32" font-family="system-ui, sans-serif" font-size="10" fill="#A1A1AA">Water</text>
+    <text x="460" y="32" font-family="system-ui, sans-serif" font-size="9" fill="#52525B">|</text>
+    <text x="480" y="32" font-family="system-ui, sans-serif" font-size="9" fill="#71717A">🛰️ 18 Satellite Sources</text>
+    <text x="640" y="32" font-family="system-ui, sans-serif" font-size="9" fill="#71717A">|</text>
+    <text x="660" y="32" font-family="system-ui, sans-serif" font-size="9" fill="#71717A">🌐 Flutter + Web PWA</text>
+    <text x="810" y="32" font-family="system-ui, sans-serif" font-size="9" fill="#71717A">|</text>
+    <text x="830" y="32" font-family="system-ui, sans-serif" font-size="9" fill="#71717A">🧠 Quantum Ready</text>
+  </g>
+
+  <!-- Bottom bar -->
+  <rect x="50" y="1420" width="1100" height="50" rx="16" fill="#0D2818" stroke="#2E7D32" stroke-width="1"/>
+  <text x="600" y="1445" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#4ADE80" text-anchor="middle">Get Started Today! 🚀</text>
+  <text x="600" y="1462" font-family="system-ui, sans-serif" font-size="9" fill="#71717A" text-anchor="middle">Download APK: GitHub Releases • Web App: krishidrishti.netlify.app • API: krishi-drishti-backend.onrender.com</text>
+
+  <!-- Badges at bottom -->
+  <g transform="translate(200, 1500)">
+    <rect x="0" y="0" rx="12" width="120" height="30" fill="#2E7D32"/>
+    <text x="60" y="20" font-family="system-ui, sans-serif" font-size="11" fill="white" text-anchor="middle" font-weight="bold">📲 Download APK</text>
+    
+    <rect x="135" y="0" rx="12" width="120" height="30" fill="#1976D2"/>
+    <text x="195" y="20" font-family="system-ui, sans-serif" font-size="11" fill="white" text-anchor="middle" font-weight="bold">🌐 Web App</text>
+    
+    <rect x="270" y="0" rx="12" width="120" height="30" fill="#F9A825"/>
+    <text x="330" y="20" font-family="system-ui, sans-serif" font-size="11" fill="white" text-anchor="middle" font-weight="bold">📊 API Docs</text>
+    
+    <rect x="405" y="0" rx="12" width="120" height="30" fill="#3ECF8E"/>
+    <text x="465" y="20" font-family="system-ui, sans-serif" font-size="11" fill="white" text-anchor="middle" font-weight="bold">🐛 Report Issue</text>
+
+    <rect x="540" y="0" rx="12" width="140" height="30" fill="#18181B" stroke="#4ADE80" stroke-width="1.5"/>
+    <text x="610" y="20" font-family="system-ui, sans-serif" font-size="11" fill="#4ADE80" text-anchor="middle" font-weight="bold">⭐ Star on GitHub</text>
+  </g>
+
+  <!-- Bottom text -->
+  <text x="600" y="1570" font-family="system-ui, sans-serif" font-size="11" fill="#52525B" text-anchor="middle">Made with ❤️ for Indian Farmers • जय किसान • जय विज्ञान 🌾🛰️</text>
+  <text x="600" y="1590" font-family="system-ui, sans-serif" font-size="9" fill="#3a3a3a" text-anchor="middle">© 2026 Krishi Drishti • MIT License • Free & Open Source</text>
+</svg>

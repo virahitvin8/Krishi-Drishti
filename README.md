@@ -65,13 +65,17 @@
 - [✨ Features](#-features)
 - [🛰️ How It Works](#️-how-it-works)
 - [📲 Download APK](#-download-apk)
+- [📖 Complete Setup Guide](#-complete-setup-guide)
 - [🏗️ System Architecture](#️-system-architecture)
+- [📊 App Workflow Diagram](#-app-workflow-diagram)
 - [🛠️ Technology Stack](#️-technology-stack)
 - [📱 Screenshots](#-screenshots)
 - [📡 Satellite Data Sources](#-satellite-data-sources)
 - [🚀 Quick Start](#-quick-start)
 - [📖 API Endpoints](#-api-endpoints)
 - [🌍 Deployment](#-deployment)
+- [⚡ Quantum Technology Integration](#-quantum-technology-integration)
+- [🐳 Harness CI Pipeline](#-harness-ci-pipeline)
 - [🤝 Contributing](#-contributing)
 - [📜 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
@@ -186,6 +190,16 @@ Open [krishidrishti.netlify.app](https://krishidrishti.netlify.app) in Chrome on
 
 ---
 
+## 📖 Complete Setup Guide
+
+For a **complete, step-by-step guide** covering everything — directory structure explained, which APK to choose, how to install on Android, how to use all features, maps & layers explained, quantum integration, CI/CD setup, and troubleshooting — see:
+
+> 📄 **[SETUP_GUIDE.md](SETUP_GUIDE.md)** — *The complete Krishi Drishti setup manual*
+
+Also check out the visual workflow diagram below for a high-level overview of how the entire app works from satellite to farmer.
+
+---
+
 ## 🏗️ System Architecture
 
 ```
@@ -297,6 +311,18 @@ Open [krishidrishti.netlify.app](https://krishidrishti.netlify.app) in Chrome on
 | [Render](https://render.com) | Backend hosting with health checks |
 | [Harness CI](https://harness.io) | Alternative CI pipeline (free tier) |
 | [Grafana](https://grafana.com) | Real-time monitoring dashboard |
+
+---
+
+## 📊 App Workflow Diagram
+
+Here's a complete animated visual overview of how Krishi Drishti works — from satellites to your phone:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/virahitvin8/Krishi-Drishti/main/.github/workflow-overview.svg" alt="Krishi Drishti Workflow" width="100%" max-width="900px">
+</p>
+
+> *SVG diagram shows: ① Satellite data sources → ② Backend processing → ③ User interfaces (Flutter app + Web PWA) → ④ Deployment & CI/CD*
 
 ---
 
@@ -457,6 +483,78 @@ The project uses **GitHub Actions** for continuous integration:
 - **On push/PR** → Runs `flutter analyze` and builds debug APK
 - **On tag `v*`** → Builds release APK and creates a GitHub Release with the APK attached
 - **Manual trigger** → Workflow dispatch with build type selection
+
+---
+
+## ⚡ Quantum Technology Integration
+
+Krishi Drishti is designed to be **quantum-ready** — the architecture supports integrating quantum computing for advanced agricultural analysis.
+
+### Free Quantum APIs You Can Use
+
+| Provider | Free Tier | Python Library | Use Case |
+|----------|-----------|----------------|----------|
+| **IBM Quantum** | 10 min/month | `qiskit` | Crop classification via Quantum ML |
+| **AWS Braket** | Free simulator credits | `amazon-braket-sdk` | Irrigation optimization (QAOA) |
+| **Azure Quantum** | Free simulation | `qsharp` | Fertilizer chemistry simulation |
+| **Google Cirq** | Free simulator | `cirq` | Research & algorithm prototyping |
+
+### How Quantum Can Enhance Krishi Drishti
+
+```
+Classical (current system)     →     Quantum (future enhancement)
+──────────────────────────────────────────────────────────────────
+📡 Satellite data fetch               🔬 Quantum pattern recognition
+📊 NDVI/EVI computation                🧬 Molecular fertilizer design
+🌤️ Weather analysis                    📈 Route optimization for irrigation
+📋 Report generation                   ⚡ Faster classification
+```
+
+### Quick Start: Try Quantum Analysis
+
+```bash
+pip install qiskit qiskit-aer
+```
+
+```python
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+
+# Encode NDVI, EVI, NDWI into quantum states
+qc = QuantumCircuit(3, 3)
+qc.ry(0.48 * 3.14159, 0)  # NDVI → qubit 0
+qc.ry(0.51 * 3.14159, 1)  # EVI → qubit 1
+qc.ry(0.31 * 3.14159, 2)  # NDWI → qubit 2
+qc.cx(0, 1)                # Entangle for correlation
+qc.cx(1, 2)
+qc.measure_all()
+
+result = AerSimulator().run(qc, shots=1024).result()
+print(result.get_counts())
+```
+
+> 🔬 **Note:** Quantum integration is experimental. Start with **free simulators** (unlimited usage) before using real quantum hardware (limited free quota). See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed quantum setup instructions.
+
+---
+
+## 🐳 Harness CI Pipeline
+
+In addition to GitHub Actions, Krishi Drishti supports **Harness CI** (free tier) as an alternative CI/CD pipeline for building APKs.
+
+### Pipeline File
+
+> 📄 **`.harness/build-apk-pipeline.yaml`** — Ready-to-import Harness CI pipeline
+
+### What's Fixed (v1.1.0)
+
+The Harness pipeline was fixed to resolve commit `8b044f1` which had:
+- ❌ Missing `set -e` error handling
+- ❌ No timeout limit for builds
+- ❌ GRADLE_OPTS with escaped quotes breaking YAML parsing
+- ❌ No Android license acceptance step
+- ❌ No APK verification after build
+
+✅ **All issues resolved** — see [SETUP_GUIDE.md](SETUP_GUIDE.md#-harness-ci-pipeline-setup) for import instructions.
 
 ---
 

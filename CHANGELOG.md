@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-06-03
+
+### Added
+- **Complete SETUP_GUIDE.md** — Step-by-step guide covering directory structure, APK installation, feature walkthrough, maps & layers, quantum tech, CI/CD setup, and troubleshooting
+- **Animated SVG workflow diagram** — `workflow-overview.svg` showing full data flow from satellites → backend → app UI → deployment
+- **Quantum technology integration docs** — IBM Quantum, AWS Braket, Azure Quantum, Google Cirq integration guide with code examples
+- **Harness CI pipeline fix** — Resolved commit `8b044f1` failure (added `set -e`, timeout, license acceptance, APK verification, fixed GRADLE_OPTS escaping)
+- **Setup guide link** in main README for easy navigation
+- **Workflow diagram section** in README with visual overview
+- **Quantum section** in README with quick-start code example
+
+### Changed
+- README now links to SETUP_GUIDE.md for detailed instructions
+- `.gitignore` now tracks `pubspec.lock` for reproducible builds
+- Updated `CONTRIBUTING.md` with satellite-farming focus and emoji icons
+
+### Fixed
+- Harness CI pipeline: `set -e`, timeout, GRADLE_OPTS escaping, Android license acceptance, APK verification
+- `.gitignore` pubspec.lock exclusion removed
+
+---
+
 ## [3.0.0] - 2026-06-02
 
 ### Added
