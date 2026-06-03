@@ -31,77 +31,36 @@ pipeline:
                 type: Cloud
                 spec:
                   resources:
-                    memory: 4Gi
-                    cpu: 2
+                    memory: 8Gi
+                    cpu: 4
           execution:
             steps:
               - step:
-                  type: Action
-                  name: Setup Java 17
-                  identifier: setup_java
-                  spec:
-                    uses: actions/setup-java@v4
-                    with:
-                      java-version: "17"
-                      distribution: temurin
-
-              - step:
                   type: Run
-                  name: Install Android SDK & NDK
-                  identifier: install_android_sdk
+                  name: Build Flutter APK
+                  identifier: build_flutter_apk
                   spec:
+                    connectorRef: account.harnessImage
+                    image: ghcr.io/cirruslabs/flutter:3.44.1
                     shell: Sh
                     command: |-
-                      yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358" || echo "SDK components installed"
+                      echo "=== Flutter version ==="
+                      flutter --version
 
-              - step:
-                  type: Action
-                  name: Setup Flutter
-                  identifier: setup_flutter
-                  spec:
-                    uses: subosito/flutter-action@v2
-                    with:
-                      flutter-version: "3.44.1"
-                      channel: stable
-                      cache: true
+                      echo "=== Get dependencies ==="
+                      cd KrishiDrishti_Final_v4/flutter_app
+                      flutter pub get
 
-              - step:
-                  type: Run
-                  name: Get Dependencies
-                  identifier: get_dependencies
-                  spec:
-                    shell: Sh
-                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
-                    command: flutter pub get
+                      echo "=== Run analyze ==="
+                      flutter analyze
 
-              - step:
-                  type: Run
-                  name: Flutter Analyze
-                  identifier: flutter_analyze
-                  spec:
-                    shell: Sh
-                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
-                    command: flutter analyze
+                      echo "=== Build APK ==="
+                      flutter build apk --debug
 
-              - step:
-                  type: Run
-                  name: Build Debug APK
-                  identifier: build_debug_apk
-                  spec:
-                    shell: Sh
-                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
-                    command: flutter build apk --debug
-
-              - step:
-                  type: Run
-                  name: Rename & Prepare APK
-                  identifier: prepare_apk
-                  spec:
-                    shell: Sh
-                    workingDirectory: KrishiDrishti_Final_v4/flutter_app
-                    command: |-
+                      echo "=== Copy APK artifact ==="
                       cp build/app/outputs/flutter-apk/app-debug.apk \
                          ../../krishi-drishti-debug.apk
+                      ls -lh ../../krishi-drishti-debug.apk
 
               - step:
                   type: Artifact
@@ -119,3 +78,6 @@ pipeline:
           - name: ANDROID_SDK_ROOT
             type: String
             value: /usr/local/lib/android/sdk
+          - name: GRADLE_OPTS
+            type: String
+            value: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx4g"
