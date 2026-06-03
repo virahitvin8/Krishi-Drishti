@@ -81,10 +81,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install NDK
+      - name: Ensure cmdline-tools and install NDK
         run: |
-          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk;${{ env.NDK_VERSION }}" || \
-          echo "NDK may already be installed, continuing..."
+          yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager --install "ndk;${{ env.NDK_VERSION }}" 2>/dev/null || \
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "ndk;${{ env.NDK_VERSION }}" 2>/dev/null || \
+          echo "::warning::Could not install NDK via sdkmanager, Gradle will handle it"
 
       - name: Determine build type
         id: build_type
