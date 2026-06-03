@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Krishi Drishti • कृषि दृष्टि</title>
+    <title id="pageTitle">Krishi Drishti • कृषि दृष्टि</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2E7D32">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -140,11 +140,10 @@
                                 <line x1="100" y1="76" x2="100" y2="104" stroke="#A5D6A7" stroke-width="2" stroke-linecap="round"/>
                             </g>
                         </svg>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="text-xl sm:text-2xl font-bold tracking-tighter truncate">Krishi Drishti</h1>
-                        <p class="text-emerald-400 text-[10px] -mt-0.5 truncate">कृषि दृष्टि • Smart Farming</p>
-                    </div>
+                    </div>                            <div class="min-w-0">
+                                <h1 class="text-xl sm:text-2xl font-bold tracking-tighter truncate" data-i18n="app_name">Krishi Drishti</h1>
+                                <p class="text-emerald-400 text-[10px] -mt-0.5 truncate" data-i18n="app_tagline">कृषि दृष्टि • Smart Farming</p>
+                            </div>
                 </div>
             </div>
             
@@ -196,7 +195,7 @@
                 <div class="bg-zinc-900 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-zinc-800">
                     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                         <div>
-                            <div class="text-xs text-zinc-400 mb-1 font-medium tracking-wider">OVERALL CROP HEALTH</div>
+                            <div class="text-xs text-zinc-400 mb-1 font-medium tracking-wider" data-i18n="overall_crop_health">OVERALL CROP HEALTH</div>
                             <div class="flex items-baseline gap-3 sm:gap-4 flex-wrap">
                                 <div id="overallScore" class="text-6xl sm:text-8xl font-bold text-emerald-400">78</div>
                                 <div>
@@ -214,7 +213,7 @@
                             </button>
                             <button onclick="analyzeSelectedArea()" 
                                     class="px-5 sm:px-8 py-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold text-sm sm:text-base transition flex items-center gap-2">
-                                <span>🔍</span><span>Analyze</span>
+                                <span>🔍</span><span data-i18n="analyze">Analyze</span>
                             </button>
                         </div>
                     </div>
@@ -506,6 +505,376 @@
 
     <script>
     // ================================================================
+    // APP VERSION & UPDATE CHECK
+    // ================================================================
+    const APP_VERSION = '1.1.0';
+
+    async function checkForUpdates() {
+        try {
+            const resp = await fetch('https://api.github.com/repos/virahitvin8/Krishi-Drishti/releases/latest');
+            const data = await resp.json();
+            const latestVersion = data.tag_name?.replace('v', '') || '1.0.0';
+            const currentVersion = APP_VERSION;
+            
+            // Store latest known version locally
+            const knownVersion = localStorage.getItem('krishi_known_version');
+            
+            if (compareVersions(latestVersion, currentVersion) > 0) {
+                // New version available!
+                if (knownVersion !== latestVersion) {
+                    localStorage.setItem('krishi_known_version', latestVersion);
+                    showUpdateNotification(latestVersion, data.html_url, data.body || '');
+                }
+            }
+        } catch(e) {
+            console.log('Update check deferred (offline or GitHub not reachable)');
+        }
+    }
+
+    function compareVersions(v1, v2) {
+        const p1 = v1.split('.').map(Number);
+        const p2 = v2.split('.').map(Number);
+        for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+            const n1 = p1[i] || 0, n2 = p2[i] || 0;
+            if (n1 > n2) return 1;
+            if (n1 < n2) return -1;
+        }
+        return 0;
+    }
+
+    function showUpdateNotification(version, url, releaseNotes) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-[999] p-4 modal-overlay';
+        modal.innerHTML = `
+            <div class="bg-zinc-900 rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-emerald-700 modal-overlay slide-up">
+                <div class="text-center mb-6">
+                    <div class="text-5xl mb-4">🚀</div>
+                    <h3 class="text-2xl font-bold text-emerald-400">New Update Available!</h3>
+                    <p class="text-zinc-400 mt-2">Krishi Drishti <strong>v${version}</strong> is ready</p>
+                </div>
+                <div class="bg-zinc-800/50 rounded-xl p-4 mb-6 text-sm text-zinc-300 max-h-32 overflow-auto">
+                    ${releaseNotes ? releaseNotes.substring(0, 300) : 'Bug fixes and improvements'}
+                </div>
+                <div class="flex gap-3">
+                    <a href="${url}" target="_blank" 
+                       class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-semibold text-sm text-center transition block">
+                        📲 Download Now
+                    </a>
+                    <button onclick="this.closest('.fixed').remove()" 
+                            class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold text-sm transition">
+                        Later
+                    </button>
+                </div>
+                <p class="text-xs text-zinc-500 text-center mt-4">Current version: v${APP_VERSION}</p>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // ================================================================
+    // LANGUAGE / TRANSLATION SYSTEM (English Default)
+    // ================================================================
+    const TRANSLATIONS = {
+        en: {
+            app_name: 'Krishi Drishti',
+            app_tagline: 'कृषि दृष्टि • Smart Farming',
+            dashboard: 'Dashboard',
+            map: 'Map',
+            tools: 'Tools',
+            saved_farms: 'Saved Farms',
+            settings: 'Settings',
+            overall_crop_health: 'OVERALL CROP HEALTH',
+            healthy: 'Healthy',
+            moderate: 'Moderate',
+            stressed: 'Stressed',
+            critical: 'Critical',
+            crop_health: 'Crop Health',
+            water_irrigation: 'Water & Irrigation',
+            weather: 'Weather',
+            recommendations: 'Recommendations',
+            field_map: 'Field Map',
+            select_land: 'Select land or use demo',
+            demo: 'Demo',
+            saved: 'Saved',
+            grid: 'Grid',
+            stressed_label: 'Stressed',
+            healthy_label: 'Healthy',
+            pest_risk: 'Pest Risk',
+            drainage: 'Drainage',
+            analyze: 'Analyze',
+            save_farm: 'Save Farm',
+            refresh: 'Refresh',
+            login: 'Login',
+            logout: 'Logout',
+            login_title: '👤 Login / Register',
+            your_name: 'Your Name',
+            phone_optional: 'Phone (optional)',
+            continue: 'Continue',
+            data_stays_local: 'Your data stays on your device. No password needed.',
+            profile: 'Profile',
+            display_name: 'Display Name',
+            language: 'Language',
+            state: 'State',
+            save_settings: 'Save Settings',
+            data_preferences: '📡 Data Preferences',
+            auto_refresh: 'Auto-refresh satellite data every 7 days',
+            notify_new_data: 'Notify when new satellite data is available',
+            save_history: 'Save analysis history locally',
+            account: '🔐 Account',
+            logged_in_as: 'Logged in as:',
+            upload_csv: 'Upload CSV',
+            full_report: 'Full Report',
+            satellites: 'Satellites',
+            grafana: 'Grafana',
+            batch_fields: 'Batch fields',
+            all_metrics: 'All metrics',
+            data_sources: 'Data sources',
+            live_dashboard: 'Live dashboard',
+            good_vigor: 'Good vigor',
+            dense_canopy: 'Dense canopy',
+            monitor_early: 'Monitor early',
+            soil_adjusted: 'Soil adjusted',
+            water_index: 'Water index',
+            moisture: 'Moisture',
+            last_updated: 'Last updated:',
+            view_full_breakdown: 'View full breakdown & recommendations →',
+            no_saved_farms: 'No saved farms yet. Analyze a field and click "Save Farm" to add one.',
+            updated: 'Updated',
+            just_now: 'Just now',
+            settings_saved: 'Settings saved ✅',
+            welcome: 'Welcome',
+            farm_saved: 'Farm saved! 📋',
+            farm_removed: 'Farm removed',
+            analysis_complete: '✅ Analysis complete',
+            data_refreshed: '✅ Data refreshed',
+            fetching_data: '🔄 Fetching latest satellite data...',
+            connecting_to_satellites: 'Connecting to satellites...',
+            analyzing_land: 'Analyzing your selected land',
+            fetching_sentinel: 'Fetching Sentinel-2, weather & SAR data',
+            app_version: 'App v4.0 • All data processed locally • Jai Kisan 🌾',
+            install_title: '📲 Install Krishi Drishti',
+            install_desc: 'For the best experience, install this app on your phone:',
+            install_android: '📱 Install APK on Android',
+            install_pwa: '🌐 Add to Home Screen (PWA)',
+            install_android_step1: '1. Download the APK from GitHub Releases',
+            install_android_step2: '2. Open Settings → Install unknown apps',
+            install_android_step3: '3. Install the APK and launch the app',
+            download_apk_btn: '⬇️ Download APK v',
+        },
+        hi: {
+            app_name: 'कृषि दृष्टि',
+            app_tagline: 'स्मार्ट फार्मिंग के लिए उपग्रह दृष्टि',
+            dashboard: 'डैशबोर्ड',
+            map: 'नक्शा',
+            tools: 'उपकरण',
+            saved_farms: 'सहेजे गए खेत',
+            settings: 'सेटिंग्स',
+            overall_crop_health: 'समग्र फसल स्वास्थ्य',
+            healthy: 'स्वस्थ',
+            moderate: 'मध्यम',
+            stressed: 'तनावग्रस्त',
+            critical: 'गंभीर',
+            crop_health: 'फसल स्वास्थ्य',
+            water_irrigation: 'जल और सिंचाई',
+            weather: 'मौसम',
+            recommendations: 'सिफारिशें',
+            field_map: 'खेत का नक्शा',
+            select_land: 'जमीन चुनें या डेमो देखें',
+            demo: 'डेमो',
+            saved: 'सहेजें',
+            grid: 'ग्रिड',
+            stressed_label: 'तनावग्रस्त',
+            healthy_label: 'स्वस्थ',
+            pest_risk: 'कीट जोखिम',
+            drainage: 'जल निकासी',
+            analyze: 'विश्लेषण',
+            save_farm: 'खेत सहेजें',
+            refresh: 'ताज़ा करें',
+            login: 'लॉगिन',
+            logout: 'लॉगआउट',
+            login_title: '👤 लॉगिन / रजिस्टर',
+            your_name: 'आपका नाम',
+            phone_optional: 'फोन (वैकल्पिक)',
+            continue: 'जारी रखें',
+            data_stays_local: 'आपका डेटा आपके डिवाइस पर रहता है। कोई पासवर्ड नहीं।',
+            profile: 'प्रोफ़ाइल',
+            display_name: 'प्रदर्शन नाम',
+            language: 'भाषा',
+            state: 'राज्य',
+            save_settings: 'सेटिंग्स सहेजें',
+            data_preferences: '📡 डेटा प्राथमिकताएँ',
+            auto_refresh: 'हर 7 दिन में उपग्रह डेटा ऑटो-रिफ्रेश',
+            notify_new_data: 'जब नया उपग्रह डेटा उपलब्ध हो तो सूचित करें',
+            save_history: 'विश्लेषण इतिहास स्थानीय रूप से सहेजें',
+            account: '🔐 खाता',
+            logged_in_as: 'में लॉगिन किया:',
+            upload_csv: 'CSV अपलोड करें',
+            full_report: 'पूर्ण रिपोर्ट',
+            satellites: 'उपग्रह',
+            grafana: 'ग्राफाना',
+            batch_fields: 'बैच फ़ील्ड्स',
+            all_metrics: 'सभी मीट्रिक्स',
+            data_sources: 'डेटा स्रोत',
+            live_dashboard: 'लाइव डैशबोर्ड',
+            good_vigor: 'अच्छी वृद्धि',
+            dense_canopy: 'घना कैनोपी',
+            monitor_early: 'जल्दी निगरानी',
+            soil_adjusted: 'मृदा समायोजित',
+            water_index: 'जल सूचकांक',
+            moisture: 'नमी',
+            last_updated: 'अंतिम अपडेट:',
+            view_full_breakdown: 'पूर्ण विश्लेषण और सिफारिशें देखें →',
+            no_saved_farms: 'अभी तक कोई खेत सहेजा नहीं। खेत का विश्लेषण करें और "खेत सहेजें" पर क्लिक करें।',
+            updated: 'अपडेट किया',
+            just_now: 'अभी',
+            settings_saved: 'सेटिंग्स सहेजी गईं ✅',
+            welcome: 'स्वागत है',
+            farm_saved: 'खेत सहेजा गया! 📋',
+            farm_removed: 'खेत हटा दिया',
+            analysis_complete: '✅ विश्लेषण पूर्ण',
+            data_refreshed: '✅ डेटा ताज़ा किया',
+            fetching_data: '🔄 नवीनतम उपग्रह डेटा लाया जा रहा...',
+            connecting_to_satellites: 'उपग्रहों से जुड़ रहा है...',
+            analyzing_land: 'आपकी चुनी गई भूमि का विश्लेषण',
+            fetching_sentinel: 'सेंटिनल-2, मौसम और SAR डेटा लाया जा रहा',
+            app_version: 'ऐप v4.0 • सभी डेटा स्थानीय रूप से संसाधित • जय किसान 🌾',
+            install_title: '📲 कृषि दृष्टि इंस्टॉल करें',
+            install_desc: 'बेहतर अनुभव के लिए, यह ऐप अपने फोन पर इंस्टॉल करें:',
+            install_android: '📱 एंड्रॉइड पर APK इंस्टॉल करें',
+            install_pwa: '🌐 होम स्क्रीन में जोड़ें (PWA)',
+            install_android_step1: '1. GitHub रिलीज़ से APK डाउनलोड करें',
+            install_android_step2: '2. सेटिंग्स → अज्ञात ऐप्स इंस्टॉल करें खोलें',
+            install_android_step3: '3. APK इंस्टॉल करें और ऐप खोलें',
+            download_apk_btn: '⬇️ APK डाउनलोड करें v',
+        },
+        te: {
+            app_name: 'కృషి దృష్టి',
+            app_tagline: 'స్మార్ట్ ఫార్మింగ్ కోసం శాటిలైట్ దృష్టి',
+            dashboard: 'డ్యాష్‌బోర్డ్',
+            map: 'మ్యాప్',
+            tools: 'సాధనాలు',
+            saved_farms: 'సేవ్ చేసిన పొలాలు',
+            settings: 'సెట్టింగ్‌లు',
+            overall_crop_health: 'మొత్తం పంట ఆరోగ్యం',
+            healthy: 'ఆరోగ్యంగా',
+            moderate: 'మధ్యస్థం',
+            stressed: 'ఒత్తిడిలో',
+            critical: 'క్లిష్టమైన',
+            crop_health: 'పంట ఆరోగ్యం',
+            water_irrigation: 'నీరు మరియు నీటిపారుదల',
+            weather: 'వాతావరణం',
+            recommendations: 'సిఫార్సులు',
+            field_map: 'పొలం మ్యాప్',
+            select_land: 'భూమిని ఎంచుకోండి లేదా డెమో ఉపయోగించండి',
+            demo: 'డెమో',
+            saved: 'సేవ్డ్',
+            grid: 'గ్రిడ్',
+            stressed_label: 'ఒత్తిడిలో',
+            healthy_label: 'ఆరోగ్యకరం',
+            pest_risk: 'తెగులు ప్రమాదం',
+            drainage: 'నీటి పారుదల',
+            analyze: 'విశ్లేషించు',
+            save_farm: 'పొలం సేవ్ చేయి',
+            refresh: 'రిఫ్రెష్',
+            login: 'లాగిన్',
+            logout: 'లాగౌట్',
+            login_title: '👤 లాగిన్ / రిజిస్టర్',
+            your_name: 'మీ పేరు',
+            phone_optional: 'ఫోన్ (ఐచ్ఛికం)',
+            continue: 'కొనసాగించు',
+            data_stays_local: 'మీ డేటా మీ పరికరంలోనే ఉంటుంది. పాస్‌వర్డ్ అవసరం లేదు.',
+            profile: 'ప్రొఫైల్',
+            display_name: 'ప్రదర్శన పేరు',
+            language: 'భాష',
+            state: 'రాష్ట్రం',
+            save_settings: 'సెట్టింగ్‌లు సేవ్ చేయి',
+            data_preferences: '📡 డేటా ప్రాధాన్యతలు',
+            auto_refresh: 'ప్రతి 7 రోజులకు శాటిలైట్ డేటా ఆటో-రిఫ్రెష్',
+            notify_new_data: 'కొత్త శాటిలైట్ డేటా అందుబాటులో ఉన్నప్పుడు తెలియజేయి',
+            save_history: 'విశ్లేషణ చరిత్రను స్థానికంగా సేవ్ చేయి',
+            account: '🔐 ఖాతా',
+            logged_in_as: 'లాగిన్ అయ్యారు:',
+            upload_csv: 'CSV అప్‌లోడ్',
+            full_report: 'పూర్తి నివేదిక',
+            satellites: 'శాటిలైట్లు',
+            grafana: 'గ్రాఫానా',
+            batch_fields: 'బ్యాచ్ ఫీల్డ్స్',
+            all_metrics: 'అన్ని మెట్రిక్స్',
+            data_sources: 'డేటా మూలాలు',
+            live_dashboard: 'లైవ్ డ్యాష్‌బోర్డ్',
+            good_vigor: 'మంచి శక్తి',
+            dense_canopy: 'దట్టమైన కానోపీ',
+            monitor_early: 'ముందస్తు పర్యవేక్షణ',
+            soil_adjusted: 'నేల సర్దుబాటు',
+            water_index: 'నీటి సూచిక',
+            moisture: 'తేమ',
+            last_updated: 'చివరిగా అప్‌డేట్:',
+            view_full_breakdown: 'పూర్తి విశ్లేషణ & సిఫార్సులు చూడండి →',
+            no_saved_farms: 'ఇంకా పొలాలు సేవ్ చేయలేదు. పొలాన్ని విశ్లేషించి "పొలం సేవ్ చేయి" క్లిక్ చేయండి.',
+            updated: 'అప్‌డేట్ చేయబడింది',
+            just_now: 'ఇప్పుడే',
+            settings_saved: 'సెట్టింగ్‌లు సేవ్ అయ్యాయి ✅',
+            welcome: 'స్వాగతం',
+            farm_saved: 'పొలం సేవ్ అయ్యింది! 📋',
+            farm_removed: 'పొలం తీసివేయబడింది',
+            analysis_complete: '✅ విశ్లేషణ పూర్తయింది',
+            data_refreshed: '✅ డేటా రిఫ్రెష్ చేయబడింది',
+            fetching_data: '🔄 తాజా శాటిలైట్ డేటాను పొందుతోంది...',
+            connecting_to_satellites: 'ఉపగ్రహాలకు కనెక్ట్ అవుతోంది...',
+            analyzing_land: 'మీరు ఎంచుకున్న భూమిని విశ్లేషిస్తోంది',
+            fetching_sentinel: 'సెంటినెల్-2, వాతావరణం & SAR డేటాను పొందుతోంది',
+            app_version: 'యాప్ v4.0 • అన్ని డేటా స్థానికంగా ప్రాసెస్ చేయబడింది • జై కిసాన్ 🌾',
+            install_title: '📲 కృషి దృష్టిని ఇన్‌స్టాల్ చేయండి',
+            install_desc: 'ఉత్తమ అనుభవం కోసం, ఈ యాప్‌ను మీ ఫోన్‌లో ఇన్‌స్టాల్ చేయండి:',
+            install_android: '📱 Androidలో APK ఇన్‌స్టాల్ చేయండి',
+            install_pwa: '🌐 హోమ్ స్క్రీన్‌కు జోడించండి (PWA)',
+            install_android_step1: '1. GitHub రిలీజ్ నుండి APK డౌన్‌లోడ్ చేయండి',
+            install_android_step2: '2. సెట్టింగ్స్ → తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయండి',
+            install_android_step3: '3. APK ఇన్‌స్టాల్ చేసి యాప్‌ను తెరవండి',
+            download_apk_btn: '⬇️ APK డౌన్‌లోడ్ v',
+        }
+    };
+
+    // Get current language from localStorage or default to English
+    function getCurrentLanguage() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('krishi_state'));
+            if (saved && saved.user && saved.user.language) {
+                return saved.user.language;
+            }
+        } catch(e) {}
+        return 'en'; // DEFAULT: English
+    }
+
+    // Translate a key to the current language
+    function t(key) {
+        const lang = getCurrentLanguage();
+        const translations = TRANSLATIONS[lang] || TRANSLATIONS['en'];
+        return translations[key] || TRANSLATIONS['en'][key] || key;
+    }
+
+    // Apply current language to all translatable UI elements
+    function applyLanguage() {
+        const lang = getCurrentLanguage();
+        
+        // Title & meta
+        document.getElementById('pageTitle').textContent = TRANSLATIONS[lang]?.app_name || TRANSLATIONS.en.app_name;
+        
+        // Update elements with data-i18n attributes
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.textContent = t(key);
+        });
+        
+        // Update html lang attribute
+        document.documentElement.lang = lang;
+        
+        // Update tagline in header
+        const taglineEl = document.querySelector('.text-emerald-400.text-\[10px\]');
+        if (taglineEl) taglineEl.textContent = t('app_tagline');
+    }
+
+    // ================================================================
     // APP STATE & NAVIGATION
     // ================================================================
     const APP = {
@@ -516,15 +885,17 @@
             currentFarm: null,
             savedFarms: [],
             lastUpdate: null,
+            settingsLoaded: false,
         },
         config: {
             apiBase: 'https://krishi-drishti-backend.onrender.com',
             csvMaxSize: 50, // MB
             refreshDays: 7,
+            appVersion: APP_VERSION,
         }
     };
 
-    // Load saved state
+    // Load saved state (with language persistence)
     function loadAppState() {
         try {
             const saved = localStorage.getItem('krishi_state');
@@ -533,8 +904,17 @@
                 APP.state.user = parsed.user || null;
                 APP.state.savedFarms = parsed.savedFarms || [];
                 APP.state.lastUpdate = parsed.lastUpdate || null;
+                
+                // ✅ Ensure English is default if no language set
+                if (APP.state.user && !APP.state.user.language) {
+                    APP.state.user.language = 'en';
+                    saveAppState();
+                }
             }
         } catch(e) {}
+        
+        // Apply language before any UI renders
+        applyLanguage();
         
         // Update UI based on saved state
         if (APP.state.user) {
@@ -663,7 +1043,7 @@
     function handleLogin() {
         const name = document.getElementById('loginName').value.trim();
         if (!name) {
-            showToast('Please enter your name');
+            showToast(t('your_name') + ' required');
             return;
         }
         
@@ -671,7 +1051,7 @@
             username: name.toLowerCase().replace(/\\s+/g, '_'),
             displayName: name,
             phone: document.getElementById('loginPhone').value.trim() || '',
-            language: 'en',
+            language: getCurrentLanguage(), // Use saved language or 'en'
             state: '',
             loginTime: new Date().toISOString(),
         };
@@ -680,7 +1060,7 @@
         saveAppState();
         showLoggedInState(user);
         closeTopModal();
-        showToast('Welcome, ' + name + '! 🌾');
+        showToast(t('welcome') + ', ' + name + '! 🌾');
         
         // Try to sync with backend (optional)
         syncUserWithBackend(user);
@@ -1057,12 +1437,13 @@ latitude, longitude, field_id, crop_type, area_hectares<br>
 
     function saveSettings() {
         if (!APP.state.user) {
-            showToast('Please login first');
+            showToast(t('login') + ' first');
             return;
         }
         
+        const newLang = document.getElementById('settingsLang').value;
         APP.state.user.displayName = document.getElementById('settingsName').value || APP.state.user.displayName;
-        APP.state.user.language = document.getElementById('settingsLang').value;
+        APP.state.user.language = newLang;
         APP.state.user.state = document.getElementById('settingsState').value;
         
         // Save preferences
@@ -1070,11 +1451,19 @@ latitude, longitude, field_id, crop_type, area_hectares<br>
             autoRefresh: document.getElementById('prefAutoRefresh').checked,
             notifications: document.getElementById('prefNotifications').checked,
             saveHistory: document.getElementById('prefSaveHistory').checked,
+            language: newLang,
         }));
         
         saveAppState();
+        
+        // Apply the new language immediately
+        applyLanguage();
         document.getElementById('userNameDisplay').textContent = APP.state.user.displayName;
-        showToast('Settings saved ✅');
+        
+        // Update settings page to show translated text
+        showSettings();
+        
+        showToast(t('settings_saved'));
     }
 
     // ================================================================
@@ -1444,7 +1833,59 @@ latitude, longitude, field_id, crop_type, area_hectares<br>
         if (hash && hash !== 'dashboard') {
             setTimeout(() => navigateTo(hash), 100);
         }
+        
+        // ✅ Check for app updates (checks GitHub for new releases)
+        setTimeout(() => checkForUpdates(), 3000);
+        
+        // ✅ Show install guide if user hasn't dismissed it
+        showInstallGuideIfNeeded();
     };
+    
+    function showInstallGuideIfNeeded() {
+        const dismissed = localStorage.getItem('krishi_install_dismissed');
+        if (dismissed) return;
+        
+        // Only show on first visit or after 7 days
+        const lastDismiss = parseInt(localStorage.getItem('krishi_install_dismissed_time') || '0');
+        if (Date.now() - lastDismiss < 7 * 24 * 60 * 60 * 1000) return;
+        
+        const modal = createModal();
+        modal.innerHTML = `
+            <div class="bg-zinc-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-emerald-700 modal-overlay slide-up">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-bold" data-i18n="install_title">📲 Install Krishi Drishti</h3>
+                    <button onclick="this.closest('.fixed').remove(); localStorage.setItem('krishi_install_dismissed', '1'); localStorage.setItem('krishi_install_dismissed_time', Date.now().toString());" class="text-zinc-400 hover:text-white text-xl">✕</button>
+                </div>
+                <p class="text-sm text-zinc-400 mb-4" data-i18n="install_desc">For the best experience, install this app on your phone:</p>
+                
+                <div class="space-y-4">
+                    <div class="bg-zinc-800/60 rounded-xl p-4 border border-zinc-700/50">
+                        <p class="font-semibold text-emerald-400 mb-2" data-i18n="install_android">📱 Install APK on Android</p>
+                        <ol class="text-xs text-zinc-300 space-y-1.5 list-decimal list-inside">
+                            <li data-i18n="install_android_step1">1. Download the APK from GitHub Releases</li>
+                            <li data-i18n="install_android_step2">2. Open Settings → Install unknown apps</li>
+                            <li data-i18n="install_android_step3">3. Install the APK and launch the app</li>
+                        </ol>
+                        <a href="https://github.com/virahitvin8/Krishi-Drishti/releases/latest" target="_blank" 
+                           class="mt-3 block w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-semibold text-center transition">
+                            ⬇️ Download APK v1.1.0
+                        </a>
+                    </div>
+                    
+                    <div class="bg-zinc-800/60 rounded-xl p-4 border border-zinc-700/50">
+                        <p class="font-semibold text-sky-400 mb-2" data-i18n="install_pwa">🌐 Add to Home Screen (PWA)</p>
+                        <p class="text-xs text-zinc-400">In Chrome, tap the menu ⋮ → Add to Home screen → Install</p>
+                    </div>
+                </div>
+                
+                <button onclick="this.closest('.fixed').remove(); localStorage.setItem('krishi_install_dismissed', '1'); localStorage.setItem('krishi_install_dismissed_time', Date.now().toString());" 
+                        class="mt-4 w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-sm font-medium transition">
+                    Got it!
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
     </script>
 </body>
 </html>
