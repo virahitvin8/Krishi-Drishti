@@ -313,10 +313,3 @@ class _CsvUploadScreenState extends State<CsvUploadScreen> {
     );
   }
 }
-
-/// Simple line splitter for preview
-class LineSplitter extends Converter<String, List<String>> {
-  const LineSplitter();
-  @override
-  List<String> convert(String input) => input.split('\n');
-}
