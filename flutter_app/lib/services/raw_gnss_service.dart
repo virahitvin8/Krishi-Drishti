@@ -1,20 +1,32 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/gnss_satellite.dart';
 
-/// Raw GNSS data service - inspired by GPSTest and Google GPS Measurement Tools
-/// On real Android devices, this would use android.hardware.gnss.GnssStatus
-/// For cross-platform, we provide realistic satellite data from position info
+/// Raw GNSS data service - connects to REAL Android GnssStatus.Callback via EventChannel
+/// Falls back to realistic simulation when native channel is unavailable
+/// (e.g., on iOS, emulators without GPS, or when permissions are denied)
 class RawGnssService {
   static final RawGnssService _instance = RawGnssService._();
   factory RawGnssService() => _instance;
   RawGnssService._();
 
+  // Native EventChannels for real Android GNSS data
+  static const _satelliteChannel = EventChannel('com.krishidrishti/gnss_satellites');
+  static const _nmeaChannel = EventChannel('com.krishidrishti/gnss_nmea');
+  static const _constellationChannel = EventChannel('com.krishidrishti/gnss_constellations');
+
+  // Fallback simulation timers
   StreamSubscription<Position>? _positionStream;
-  Timer? _satelliteTimer;
+  Timer? _simulationTimer;
   Timer? _nmeaTimer;
+
+  // Real data subscriptions
+  StreamSubscription? _nativeSatSub;
+  StreamSubscription? _nativeNmeaSub;
+  StreamSubscription? _nativeConstSub;
 
   final List<GnssSatellite> _satellites = [];
   final List<String> _nmeaSentences = [];
@@ -34,8 +46,14 @@ class RawGnssService {
   DopValues _currentDop = DopValues();
   DopValues get currentDop => _currentDop;
 
-  /// Start GNSS monitoring with real satellite simulation
+  bool _usingNative = false;
+  bool get isUsingNative => _usingNative;
+
+  /// Start GNSS monitoring
+  /// First tries to connect to native Android GnssStatus.Callback via EventChannel.
+  /// Falls back to realistic simulation if native channel is unavailable.
   Future<void> startMonitoring() async {
+    // Always listen to position updates for location context
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
@@ -43,14 +61,121 @@ class RawGnssService {
       ),
     ).listen(_onPositionUpdate);
 
-    // Update satellite positions every 3 seconds (like real GPS receiver)
-    _satelliteTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      _generateRealisticSatellites();
-      _generateNmeaSentences();
+    // Try native EventChannel first (works on real Android devices)
+    _tryNativeChannel();
+
+    // If native didn't connect, simulation will kick in as fallback
+    if (!_usingNative) {
+      _startSimulationFallback();
+    }
+  }
+
+  /// Try to connect to the native Android GNSS EventChannel
+  void _tryNativeChannel() {
+    try {
+      // Attempt to listen to the native satellite stream
+      // If there's no native listener registered, this will not emit anything
+      // and we'll fall back to simulation
+      _nativeSatSub = _satelliteChannel.receiveBroadcastStream().listen(
+        (data) {
+          if (data is List) {
+            _usingNative = true;
+            _onNativeSatellites(data);
+          }
+        },
+        onError: (error) {
+          debugPrint('Native GNSS channel error, using simulation: $error');
+          _usingNative = false;
+          _startSimulationFallback();
+        },
+        onDone: () {
+          if (!_usingNative) _startSimulationFallback();
+        },
+        cancelOnError: false,
+      );
+
+      // Listen for native NMEA sentences
+      _nativeNmeaSub = _nmeaChannel.receiveBroadcastStream().listen(
+        (data) {
+          if (data is List) {
+            _onNativeNmea(data.cast<String>());
+          }
+        },
+      );
+
+      // Listen for constellation breakdown
+      _nativeConstSub = _constellationChannel.receiveBroadcastStream().listen(
+        (data) {
+          if (data is Map) {
+            _calculateDopFromNative();
+          }
+        },
+      );
+
+      // Timeout: if no native data within 5 seconds, fall back to simulation
+      Timer(const Duration(seconds: 5), () {
+        if (!_usingNative && (_simulationTimer == null || !_simulationTimer!.isActive)) {
+          _startSimulationFallback();
+        }
+      });
+    } catch (e) {
+      debugPrint('Could not connect to native GNSS: $e');
+      _usingNative = false;
+      _startSimulationFallback();
+    }
+  }
+
+  /// Process real satellite data from Android GnssStatus.Callback
+  void _onNativeSatellites(List<dynamic> data) {
+    final newSats = <GnssSatellite>[];
+
+    for (final item in data) {
+      if (item is Map) {
+        newSats.add(GnssSatellite(
+          prn: (item['prn'] as num?)?.toInt() ?? 0,
+          constellation: item['constellation'] as String? ?? 'Unknown',
+          snr: (item['snr'] as num?)?.toDouble() ?? 0.0,
+          elevation: (item['elevation'] as num?)?.toDouble() ?? 0.0,
+          azimuth: (item['azimuth'] as num?)?.toDouble() ?? 0.0,
+          usedInFix: item['usedInFix'] as bool? ?? false,
+          hasEphemeris: item['hasEphemeris'] as bool? ?? false,
+          hasAlmanac: item['hasAlmanac'] as bool? ?? false,
+          frequencyBand: item['frequencyBand'] as String?,
+        ));
+      }
+    }
+
+    _satellites
+      ..clear()
+      ..addAll(newSats);
+    _satelliteController.add(List.from(_satellites));
+
+    // Calculate DOP from real satellite geometry
+    _calculateDop();
+  }
+
+  /// Process real NMEA sentences from OnNmeaMessageListener
+  void _onNativeNmea(List<String> sentences) {
+    _nmeaSentences
+      ..clear()
+      ..addAll(sentences);
+    _nmeaController.add(List.from(_nmeaSentences));
+  }
+
+  /// Fallback: Generate realistic simulated satellite data
+  void _startSimulationFallback() {
+    if (_simulationTimer != null && _simulationTimer!.isActive) return;
+
+    debugPrint('Using simulated GNSS data (no native channel)');
+
+    _simulationTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (_usingNative) return; // Native took over
+      _generateSimulatedSatellites();
+      _generateSimulatedNmea();
     });
 
-    // Update DOP values every 5 seconds
     _nmeaTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (_usingNative) return;
       _calculateDop();
     });
   }
@@ -60,7 +185,7 @@ class RawGnssService {
   }
 
   /// Generate realistic satellite data based on position quality
-  void _generateRealisticSatellites() {
+  void _generateSimulatedSatellites() {
     final random = math.Random(DateTime.now().millisecondsSinceEpoch ~/ 3000);
     final accuracy = _lastPosition?.accuracy ?? 10;
     final fixQuality = accuracy < 5 ? 1.0 : (accuracy < 15 ? 0.8 : (accuracy < 30 ? 0.6 : 0.3));
@@ -106,15 +231,13 @@ class RawGnssService {
     _satelliteController.add(List.from(_satellites));
   }
 
-  /// Generate synthetic NMEA sentences
-  void _generateNmeaSentences() {
+  /// Generate synthetic NMEA sentences for simulation fallback
+  void _generateSimulatedNmea() {
     if (_lastPosition == null) return;
 
     final lat = _lastPosition!.latitude;
     final lng = _lastPosition!.longitude;
     final alt = _lastPosition!.altitude;
-    final speed = _lastPosition!.speed;
-    final heading = _lastPosition!.heading;
     final satsInView = _satellites.length;
     final satsUsed = _satellites.where((s) => s.usedInFix).length;
     final time = DateTime.now().toUtc();
@@ -122,7 +245,7 @@ class RawGnssService {
         '${time.minute.toString().padLeft(2, '0')}'
         '${time.second.toString().padLeft(2, '0')}.00';
 
-    // $GPGGA - Fix data
+    // $GPGGA
     final latDir = lat >= 0 ? 'N' : 'S';
     final lngDir = lng >= 0 ? 'E' : 'W';
     final latDeg = lat.abs();
@@ -143,7 +266,7 @@ class RawGnssService {
         '1,$satsUsed,${_currentDop.hdop.toStringAsFixed(1)},'
         '${alt.toStringAsFixed(1)},M,0.0,M,,')}';
 
-    // $GPGSA - DOP and active satellites
+    // $GPGSA
     final satIds = _satellites.where((s) => s.usedInFix).map((s) => s.prn.toString()).toList();
     while (satIds.length < 12) satIds.add('');
     final gpsa = '\$GPGSA,A,3,${satIds.sublist(0, 12).join(',')},'
@@ -155,7 +278,7 @@ class RawGnssService {
         '${_currentDop.hdop.toStringAsFixed(1)},'
         '${_currentDop.vdop.toStringAsFixed(1)}')}';
 
-    // $GPGSV - Satellites in view
+    // $GPGSV
     final gsvBuilder = StringBuffer('\$GPGSV,${(_satellites.length / 4).ceil()},1,$satsInView');
     for (int i = 0; i < _satellites.length && i < 4; i++) {
       final s = _satellites[i];
@@ -177,7 +300,7 @@ class RawGnssService {
     return ck.toRadixString(16).toUpperCase().padLeft(2, '0');
   }
 
-  /// Calculate DOP values (Dilution of Precision)
+  /// Calculate DOP values (Dilution of Precision) from satellite geometry
   void _calculateDop() {
     if (_satellites.isEmpty) return;
 
@@ -188,7 +311,6 @@ class RawGnssService {
       return;
     }
 
-    // Simplified DOP calculation based on satellite geometry
     double sumCos2El = 0, sumSin2El = 0;
     double sumCos2Az = 0, sumSin2Az = 0;
 
@@ -216,10 +338,22 @@ class RawGnssService {
     _dopController.add(_currentDop);
   }
 
+  /// Calculate DOP from native data (called after native constellation data arrives)
+  void _calculateDopFromNative() {
+    _calculateDop();
+  }
+
+  /// Get whether we're using real or simulated data
+  String get dataSource => _usingNative ? 'Real (GnssStatus)' : 'Simulated';
+
   void stopMonitoring() {
+    _nativeSatSub?.cancel();
+    _nativeNmeaSub?.cancel();
+    _nativeConstSub?.cancel();
     _positionStream?.cancel();
-    _satelliteTimer?.cancel();
+    _simulationTimer?.cancel();
     _nmeaTimer?.cancel();
+    _usingNative = false;
     _satellites.clear();
     _nmeaSentences.clear();
   }

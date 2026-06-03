@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Leaf shape representing Krishi Drishti -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:rotation="0">
+        <path
+            android:fillColor="#4ADE80"
+            android:pathData="M54,20 C54,20 38,38 38,54 C38,70 54,88 54,88 C54,88 70,70 70,54 C70,38 54,20 54,20 Z" />
+        <!-- Stem -->
+        <path
+            android:strokeColor="#2E7D32"
+            android:strokeWidth="3"
+            android:pathData="M54,54 L54,80" />
+    </group>
+</vector>
