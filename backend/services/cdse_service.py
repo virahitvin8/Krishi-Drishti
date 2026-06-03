@@ -4,6 +4,7 @@ Integrates with Sentinel Hub Process API to fetch Sentinel-2 and Sentinel-1 imag
 and compute vegetation indices (NDVI, EVI, NDWI, GNDVI, REIP, SAVI).
 """
 import asyncio
+import io
 import json
 import logging
 import math
@@ -11,6 +12,7 @@ from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime, timedelta
 
 import httpx
+import numpy as np
 
 from ..config import (
     CDSE_CLIENT_ID, CDSE_CLIENT_SECRET, CDSE_TOKEN_URL, CDSE_PROCESS_URL
@@ -281,15 +283,58 @@ async def fetch_sentinel1_soil_moisture(
 
 from .utils import stable_hash as _stable_hash
 
+# Try to import rasterio for real GeoTIFF parsing
+try:
+    import rasterio
+    _RASTERIO_AVAILABLE = True
+except ImportError:
+    _RASTERIO_AVAILABLE = False
+
+
+def _parse_geotiff_mean(band_data: np.ndarray) -> float:
+    """Compute mean of valid (non-NaN, non-inf) pixel values in a GeoTIFF band."""
+    valid = band_data[~np.isnan(band_data) & ~np.isinf(band_data)]
+    if len(valid) == 0:
+        return 0.0
+    return float(np.mean(valid))
+
 
 def _parse_indices_response(content: bytes) -> Dict[str, Any]:
     """
-    Parse the TIFF response from Sentinel Hub.
-    In production, this would decode GeoTIFF using rasterio.
-    For now, we return a simulated response based on the content.
+    Parse the multi-band GeoTIFF response from Sentinel Hub Process API.
+    
+    The response contains 7 bands in order:
+      0: ndvi, 1: evi, 2: ndwi, 3: gndvi, 4: reip, 5: savi, 6: truecolor (RGB)
+    
+    Uses rasterio to decode the GeoTIFF and compute mean index values.
+    Falls back to hash-based simulation if rasterio is unavailable.
     """
-    # NOTE: Full TIFF parsing requires rasterio/gdal installed on the server.
-    # Production: decode with rasterio.open(io.BytesIO(content))
+    if _RASTERIO_AVAILABLE:
+        try:
+            with rasterio.open(io.BytesIO(content)) as src:
+                band_count = src.count
+                
+                # Read each index band and compute mean
+                ndvi = _parse_geotiff_mean(src.read(1))
+                evi = _parse_geotiff_mean(src.read(2)) if band_count >= 2 else 0.0
+                ndwi = _parse_geotiff_mean(src.read(3)) if band_count >= 3 else 0.0
+                gndvi = _parse_geotiff_mean(src.read(4)) if band_count >= 4 else 0.0
+                reip = _parse_geotiff_mean(src.read(5)) if band_count >= 5 else 0.0
+                savi = _parse_geotiff_mean(src.read(6)) if band_count >= 6 else 0.0
+                
+                logger.info("Successfully parsed GeoTIFF response with rasterio")
+                return {
+                    "ndvi": round(max(-1.0, min(1.0, ndvi)), 4),
+                    "evi": round(max(-1.0, min(1.0, evi)), 4),
+                    "ndwi": round(max(-1.0, min(1.0, ndwi)), 4),
+                    "gndvi": round(max(-1.0, min(1.0, gndvi)), 4),
+                    "reip": round(max(-1.0, min(1.0, reip)), 4),
+                    "savi": round(max(-1.0, min(1.0, savi)), 4),
+                }
+        except Exception as e:
+            logger.warning(f"rasterio parsing failed, falling back to simulation: {e}")
+    
+    # Fallback: hash-based simulation
     return {
         "ndvi": 0.48 + (_stable_hash(str(content[:100])) % 20 - 10) / 100,
         "evi": 0.51 + (_stable_hash(str(content[100:200])) % 20 - 10) / 100,
@@ -302,6 +347,14 @@ def _parse_indices_response(content: bytes) -> Dict[str, Any]:
 
 def _parse_sar_response(content: bytes) -> float:
     """Parse Sentinel-1 SAR response for soil moisture."""
+    if _RASTERIO_AVAILABLE:
+        try:
+            with rasterio.open(io.BytesIO(content)) as src:
+                moisture = _parse_geotiff_mean(src.read(1))
+                logger.info("Successfully parsed SAR GeoTIFF with rasterio")
+                return round(max(0.0, min(1.0, moisture)), 4)
+        except Exception as e:
+            logger.warning(f"SAR rasterio parsing failed: {e}")
     return 0.21 + (_stable_hash(str(content[:100])) % 20 - 10) / 100
 
 

@@ -155,7 +155,7 @@ CREATE INDEX IF NOT EXISTS idx_alerts_unread ON alerts (is_read, created_at DESC
 
 
 -- ============================================
--- 6. HELPER VIEWS (for Grafana PostgreSQL queries)
+-- 9. HELPER VIEWS (for Grafana PostgreSQL queries)
 -- ============================================
 
 -- View: Latest analysis for each field
@@ -205,7 +205,49 @@ ORDER BY analysis_date DESC;
 
 
 -- ============================================
--- 7. ROW LEVEL SECURITY
+-- 6. USER PROFILES TABLE
+-- Stores registered user information
+-- ============================================
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id BIGSERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    display_name TEXT NOT NULL,
+    language TEXT DEFAULT 'en',
+    phone TEXT DEFAULT '',
+    state TEXT DEFAULT '',
+    preferences JSONB DEFAULT '{}',
+    total_analyses INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_login TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_profiles_username ON user_profiles (username);
+
+
+-- ============================================
+-- 7. SAVED FIELDS TABLE
+-- Stores fields saved by users
+-- ============================================
+CREATE TABLE IF NOT EXISTS saved_fields (
+    id BIGSERIAL PRIMARY KEY,
+    username TEXT NOT NULL REFERENCES user_profiles(username) ON DELETE CASCADE,
+    field_id TEXT NOT NULL,
+    name TEXT DEFAULT 'My Field',
+    latitude DOUBLE PRECISION NOT NULL,
+    longitude DOUBLE PRECISION NOT NULL,
+    crop_type TEXT DEFAULT 'general',
+    area_hectares DOUBLE PRECISION DEFAULT 1.0,
+    last_health_score DOUBLE PRECISION DEFAULT 0,
+    notes TEXT DEFAULT '',
+    saved_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_saved_fields_username ON saved_fields (username);
+CREATE INDEX IF NOT EXISTS idx_saved_fields_location ON saved_fields (latitude, longitude);
+
+
+-- ============================================
+-- 8. ROW LEVEL SECURITY
 -- (Optional - enable if you want per-user data isolation)
 -- ============================================
 -- Enable RLS on all tables
@@ -232,6 +274,16 @@ CREATE POLICY "Allow anon insert" ON alerts FOR INSERT WITH CHECK (true);
 -- Allow anon to update schedules and field profiles
 CREATE POLICY "Allow anon update" ON field_profiles FOR UPDATE USING (true);
 CREATE POLICY "Allow anon update" ON schedules FOR UPDATE USING (true);
+
+-- RLS for user_profiles and saved_fields (added in v4.2.0)
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE saved_fields ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access" ON user_profiles FOR SELECT USING (true);
+CREATE POLICY "Allow public read access" ON saved_fields FOR SELECT USING (true);
+CREATE POLICY "Allow anon insert" ON user_profiles FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anon insert" ON saved_fields FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anon delete" ON saved_fields FOR DELETE USING (true);
 
 
 -- ============================================
