@@ -279,12 +279,7 @@ async def fetch_sentinel1_soil_moisture(
         return _simulate_sar_soil_moisture(latitude, longitude)
 
 
-import zlib
-
-
-def _stable_hash(value: str) -> int:
-    """Create a stable hash that doesn't change across Python runs."""
-    return zlib.adler32(value.encode("utf-8")) & 0x7FFFFFFF
+from .utils import stable_hash as _stable_hash
 
 
 def _parse_indices_response(content: bytes) -> Dict[str, Any]:

@@ -28,6 +28,8 @@ from ..services.supabase_service import (
     save_analysis, save_field_profile, save_csv_batch, save_schedule,
     get_field_analyses, get_dashboard_stats, list_field_profiles
 )
+from ..services.gee_service import fetch_all_gee
+from ..services.isro_service import fetch_isro_data
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +64,31 @@ async def analyze_field(request: AnalyzeRequest):
         # 3. Fetch weather data
         weather = await fetch_weather_data(lat, lng)
         
-        # 4. Combine all analyses
-        # Derive soil moisture from weather if available
+        # 4. Fetch GEE data FIRST (covers 9+ datasets including Sentinel-2)
+        gee_data = await fetch_all_gee(lat, lng)
+        gee_s2 = gee_data.get("data", {}).get("sentinel2")
+        
+        # 5. Use GEE Sentinel-2 if available, otherwise fall back to CDSE
+        if gee_s2:
+            indices = {
+                "ndvi": gee_s2.get("ndvi", 0.4),
+                "evi": gee_s2.get("evi", 0.3),
+                "ndwi": gee_s2.get("ndwi", 0.2),
+                "gndvi": gee_s2.get("gndvi", 0.3),
+                "reip": 0.28,  # GEE doesn't compute REIP — keep CDSE default
+                "savi": gee_s2.get("savi", 0.3),
+                "source": gee_s2.get("source", "GEE"),
+            }
+        else:
+            # Fall back to CDSE Process API
+            cdse_indices = await fetch_sentinel2_indices(lat, lng)
+            indices = cdse_indices if cdse_indices else _simulate_indices(lat, lng)
+        
+        # 6. Fetch ISRO high-resolution data (India-specific)
+        isro_liss4 = await fetch_isro_data(lat, lng, sensor="resourcesat2_liss4")
+        isro_hysis = await fetch_isro_data(lat, lng, sensor="hysis")
+        
+        # 7. Combine all analyses
         sm = None
         if weather:
             precip = weather.get("precipitation_mm", 0)
@@ -79,6 +104,15 @@ async def analyze_field(request: AnalyzeRequest):
             longitude=lng,
             crop_type=crop_type
         )
+        
+        # 8. Enrich with supplementary GEE & ISRO data
+        analysis["gee_data"] = gee_data.get("data", {})
+        analysis["isro_data"] = {
+            "liss4": isro_liss4,
+            "hysis": isro_hysis,
+        }
+        analysis["sentinel3_lst"] = gee_data.get("data", {}).get("sentinel3_lst")
+        analysis["groundwater"] = gee_data.get("data", {}).get("grace_groundwater")
         
         # 5. Generate field_id and save
         field_id = f"field_{uuid4().hex[:8]}"
@@ -449,16 +483,27 @@ async def get_satellite_status():
     """Get information about available satellite data sources and their status."""
     return {
         "success": True,
-        "satellites": get_satellite_info(),
-        "update_frequency": "Every 7 days (configurable)",
-        "sources": [
-            "ESA Copernicus Sentinel-2 (10m resolution - NDVI, EVI, NDWI, GNDVI, REIP, SAVI)",
-            "ESA Copernicus Sentinel-1 SAR (Soil moisture, flood detection)",
-            "NASA/USGS Landsat 8/9 (30m - long-term vegetation trends)",
-            "NASA POWER (Weather data - temperature, precipitation, radiation)",
-            "Open-Meteo (Weather forecasts - 3 day outlook)",
-            "ISRO Bhoonidhi (Indian remote sensing data - Resourcesat, Cartosat)"
-        ]
+        "satellites": get_satellite_info(),            "update_frequency": "Every 7 days (configurable)",
+            "sources": [
+                "ESA Copernicus Sentinel-2 (10m resolution - NDVI, EVI, NDWI, GNDVI, REIP, SAVI)",
+                "ESA Copernicus Sentinel-1 SAR (Soil moisture, flood detection)",
+                "ESA Sentinel-3 SLSTR (Land surface temperature, 1km)",
+                "ESA Sentinel-3 OLCI (Chlorophyll-a, water quality, 300m)",
+                "NASA SMAP (Surface soil moisture, 10km)",
+                "NASA GRACE-FO (Groundwater anomalies, monthly)",
+                "NASA/USGS Landsat 8/9 (30m - long-term vegetation trends)",
+                "NASA POWER (Weather data - temperature, precipitation, radiation)",
+                "CHIRPS/UCSB (Rainfall, 5.5km daily)",
+                "OpenLandMap (Soil texture, pH, organic carbon, 250m)",
+                "Copernicus DEM 30m (Elevation, slope, aspect)",
+                "ERA5-Land (Hourly climate reanalysis)",
+                "Open-Meteo (Weather forecasts - 3 day outlook)",
+                "ISRO Resourcesat-2 LISS-IV (5.8m - high-res vegetation)",
+                "ISRO HySIS (Hyperspectral 55-band - crop chemistry)",
+                "ISRO Cartosat-3 (0.25m - sub-meter crop stress)",
+                "ISRO RISAT-1A (C-band SAR - all-weather soil moisture)",
+                "ISRO Bhoonidhi (Indian remote sensing data portal)"
+            ]
     }
 
 

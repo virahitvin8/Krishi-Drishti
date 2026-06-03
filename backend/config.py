@@ -21,13 +21,18 @@ NASA_EARTHDATA_PASS = os.getenv("NASA_EARTHDATA_PASS", "")
 BHOONIDHI_USER = os.getenv("BHOONIDHI_USER", "")
 BHOONIDHI_PASS = os.getenv("BHOONIDHI_PASS", "")
 
+# --- Google Earth Engine ---
+# Set path to service-account JSON key for server-side auth, or leave blank
+# to use ``earthengine authenticate`` default credentials.
+GEE_SERVICE_ACCOUNT_JSON = os.getenv("GEE_SERVICE_ACCOUNT_JSON", "")
+
 # --- Supabase ---
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
 # --- App Config ---
 APP_NAME = "Krishi Drishti"
-APP_VERSION = "4.0.0"
+APP_VERSION = "4.2.0"
 DEFAULT_LAT = 25.3176
 DEFAULT_LNG = 82.9739
 SATELLITE_REFRESH_DAYS = 7
