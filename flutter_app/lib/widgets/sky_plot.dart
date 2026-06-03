@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/gnss_satellite.dart';
 
@@ -55,7 +55,7 @@ class _SkyPlotPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       );
       labelPainter.layout();
-      labelPainter.paint(canvas, Offset(center.x + r + 4, center.y - 6));
+      labelPainter.paint(canvas, Offset(center.dx + r + 4, center.dy - 6));
     }
 
     // Draw cardinal direction lines
@@ -63,10 +63,10 @@ class _SkyPlotPainter extends CustomPainter {
       ..color = const Color(0xFF27272A)
       ..strokeWidth = 1;
     for (int i = 0; i < 4; i++) {
-      final angle = i * pi / 2;
+      final angle = i * math.pi / 2;
       canvas.drawLine(
         center,
-        Offset(center.x + cos(angle) * radius, center.y + sin(angle) * radius),
+        Offset(center.dx + math.cos(angle) * radius, center.dy + math.sin(angle) * radius),
         dirPaint,
       );
     }
@@ -74,7 +74,7 @@ class _SkyPlotPainter extends CustomPainter {
     // Direction labels
     final dirs = ['N', 'E', 'S', 'W'];
     for (int i = 0; i < 4; i++) {
-      final angle = i * pi / 2;
+      final angle = i * math.pi / 2;
       final labelPainter = TextPainter(
         text: TextSpan(
           text: dirs[i],
@@ -86,20 +86,19 @@ class _SkyPlotPainter extends CustomPainter {
       labelPainter.paint(
         canvas,
         Offset(
-          center.x + cos(angle) * (radius + 16) - labelPainter.width / 2,
-          center.y + sin(angle) * (radius + 16) - labelPainter.height / 2,
+          center.dx + math.cos(angle) * (radius + 16) - labelPainter.width / 2,
+          center.dy + math.sin(angle) * (radius + 16) - labelPainter.height / 2,
         ),
       );
     }
 
     // Draw satellites
     for (final sat in satellites) {
-      final elevRad = sat.elevation * pi / 180;
-      final azimRad = sat.azimuth * pi / 180;
+      final azimRad = sat.azimuth * math.pi / 180;
       final distFromCenter = radius * (1 - sat.elevation / 90);
       
-      final x = center.x + sin(azimRad) * distFromCenter;
-      final y = center.y - cos(azimRad) * distFromCenter;
+      final x = center.dx + math.sin(azimRad) * distFromCenter;
+      final y = center.dy - math.cos(azimRad) * distFromCenter;
 
       // Size based on SNR
       final dotRadius = 4.0 + (sat.snr / 40) * 4;
@@ -122,7 +121,7 @@ class _SkyPlotPainter extends CustomPainter {
       if (sat.snr > 20) {
         final labelPainter = TextPainter(
           text: TextSpan(
-            text: '${sat.constellation.substring(0, min(2, sat.constellation.length))}${sat.prn}',
+            text: '${sat.constellation.substring(0, math.min(2, sat.constellation.length))}${sat.prn}',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 8,
@@ -139,6 +138,4 @@ class _SkyPlotPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SkyPlotPainter oldDelegate) => true;
-
-  int min(int a, int b) => a < b ? a : b;
 }

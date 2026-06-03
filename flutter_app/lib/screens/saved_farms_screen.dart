@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../models/farm.dart';
 import '../services/storage_service.dart';
-import '../services/gps_service.dart';
 
 /// Shows saved farms list with GPS distance info
 class SavedFarmsScreen extends StatefulWidget {
@@ -16,7 +15,6 @@ class SavedFarmsScreen extends StatefulWidget {
 
 class _SavedFarmsScreenState extends State<SavedFarmsScreen> {
   List<Farm> _farms = [];
-  final GpsService _gps = GpsService();
 
   @override
   void initState() {
@@ -25,11 +23,11 @@ class _SavedFarmsScreenState extends State<SavedFarmsScreen> {
   }
 
   void _loadFarms() {
-    setState(() => _farms = StorageService().getSavedFarms());
+    setState(() => _farms = StorageService.instance.getSavedFarms());
   }
 
   void _deleteFarm(String id) async {
-    await StorageService().removeFarm(id);
+    await StorageService.instance.removeFarm(id);
     _loadFarms();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

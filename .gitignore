@@ -47,5 +47,30 @@ node_modules/
 # Sentinel Hub config files
 sentinelhub_config.json
 
+# ====================================
+# Flutter/Dart specific
+# ====================================
+flutter_app/.dart_tool/
+flutter_app/.packages
+flutter_app/.pub/
+flutter_app/build/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+flutter_app/pubspec.lock
+flutter_app/**/local.properties
+flutter_app/android/.gradle/
+flutter_app/android/gradle/wrapper/gradle-wrapper.jar
+flutter_app/android/gradlew
+flutter_app/android/gradlew.bat
+flutter_app/android/captures/
+flutter_app/android/cxx/
+flutter_app/android/key.properties
+flutter_app/android/app/google-services.json
+flutter_app/android/app/*.jks
+flutter_app/android/app/*.keystore
+
 # Windows artifacts
 nul
+
+# AI CLI / service account keys
+*.json

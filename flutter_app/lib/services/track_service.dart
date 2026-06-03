@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,7 +87,7 @@ class TrackService {
     // Start position stream with battery-optimized settings
     _positionStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
-        accuracy: _batteryOptimized ? LocationAccuracy.balanced : LocationAccuracy.high,
+        accuracy: _batteryOptimized ? LocationAccuracy.medium : LocationAccuracy.high,
         distanceFilter: _batteryOptimized ? _logDistanceMeters.toInt() : 0,
         timeLimit: null,
       ),

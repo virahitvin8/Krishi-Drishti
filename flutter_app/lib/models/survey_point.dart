@@ -161,6 +161,19 @@ class SurveyPoint {
   factory SurveyPoint.fromJson(String json) => SurveyPoint.fromMap(jsonDecode(json));
 }
 
+/// Extension to get icon for SurveyType
+String surveyTypeIcon(SurveyType type) {
+  switch (type) {
+    case SurveyType.pestCheck: return '🐛';
+    case SurveyType.soilSample: return '🧪';
+    case SurveyType.irrigationStatus: return '💧';
+    case SurveyType.cropCondition: return '🌾';
+    case SurveyType.generalObservation: return '👁️';
+    case SurveyType.damageAssessment: return '⚠️';
+    case SurveyType.nutrientDeficiency: return '🧬';
+  }
+}
+
 /// Pre-defined survey form templates
 class SurveyTemplate {
   final SurveyType type;

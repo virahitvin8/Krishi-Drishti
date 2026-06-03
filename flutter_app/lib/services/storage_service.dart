@@ -22,6 +22,13 @@ class StorageService {
     return _instance!;
   }
 
+  static StorageService get instance {
+    if (_instance == null) {
+      throw StateError('StorageService not initialized. Call StorageService.init() first.');
+    }
+    return _instance!;
+  }
+
   // ============= User =============
   AppUser? getUser() {
     final data = _prefs.getString(_keyUser);

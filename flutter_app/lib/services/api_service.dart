@@ -48,11 +48,11 @@ class ApiService {
         return Analysis.fromJson(data['analysis'] ?? {});
       } else {
         debugPrint('Analysis API error: ${response.statusCode}');
-        return _generateMockAnalysis(latitude, longitude);
+        return generateMockAnalysis(latitude, longitude);
       }
     } catch (e) {
       debugPrint('Analysis API exception: $e');
-      return _generateMockAnalysis(latitude, longitude);
+      return generateMockAnalysis(latitude, longitude);
     }
   }
 

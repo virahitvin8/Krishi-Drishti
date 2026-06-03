@@ -60,7 +60,6 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
             const SizedBox(width: 8),
             const Text('GNSS Status'),
             const Spacer(),
-            // Satellite count badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -98,16 +97,13 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
 
   Widget _buildSkyPlotTab() {
     final breakdown = _gnss.getConstellationBreakdown();
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Sky plot
           Center(child: SkyPlot(satellites: _satellites, size: 300)),
           const SizedBox(height: 16),
-
-          // Stats row
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -125,8 +121,6 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
             ),
           ),
           const SizedBox(height: 16),
-
-          // Location
           if (_stats.latitude != null)
             Container(
               width: double.infinity,
@@ -161,10 +155,7 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
                 ],
               ),
             ),
-
           const SizedBox(height: 16),
-
-          // Constellation breakdown
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -207,16 +198,14 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
   }
 
   Widget _buildSignalsTab() {
-    // Sort by SNR descending
-    final sorted = List<GnssSatellite>.from(_satellites)
-      ..sort((a, b) => b.snr.compareTo(a.snr));
+    final sorted = List<GnssSatellite>.from(_satellites);
+    sorted.sort((a, b) => b.snr.compareTo(a.snr));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Signal strength legend
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -245,11 +234,8 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
             ),
           ),
           const SizedBox(height: 16),
-
-          // Top signals
           const Text('Top Signals', style: TextStyle(color: Color(0xFFD4D4D8), fontSize: 14, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
-
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -258,46 +244,46 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
               border: Border.all(color: const Color(0xFF27272A)),
             ),
             child: Column(
-              children: sorted.take(5).map((sat) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 28, height: 28,
-                      decoration: BoxDecoration(
-                        color: Color(sat.constellationColor).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
+              children: [
+                ...sorted.take(5).map((sat) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28, height: 28,
+                        decoration: BoxDecoration(
+                          color: Color(sat.constellationColor).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(child: Text(sat.constellationIcon, style: const TextStyle(fontSize: 14))),
                       ),
-                      child: Center(child: Text(sat.constellationIcon, style: const TextStyle(fontSize: 14))),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${sat.constellation} ${sat.prn}',
-                              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
-                          Text('El: ${sat.elevation.toStringAsFixed(1)}° Az: ${sat.azimuth.toStringAsFixed(1)}°',
-                              style: const TextStyle(color: Color(0xFF52525B), fontSize: 10)),
-                        ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${sat.constellation} ${sat.prn}',
+                                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+                            Text('El: ${sat.elevation.toStringAsFixed(1)}° Az: ${sat.azimuth.toStringAsFixed(1)}°',
+                                style: const TextStyle(color: Color(0xFF52525B), fontSize: 10)),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text('${sat.snr.toStringAsFixed(1)} dB-Hz',
-                        style: TextStyle(color: Color(sat.constellationColor), fontSize: 12, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              )).toList(),
-              if (sorted.length > 5)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text('+ ${sorted.length - 5} more satellites',
-                      style: const TextStyle(color: Color(0xFF52525B), fontSize: 11)),
-                ),
+                      Text('${sat.snr.toStringAsFixed(1)} dB-Hz',
+                          style: TextStyle(color: Color(sat.constellationColor), fontSize: 12, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                )),
+                if (sorted.length > 5)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text('+ ${sorted.length - 5} more satellites',
+                        style: const TextStyle(color: Color(0xFF52525B), fontSize: 11)),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
-
-          // Signal chart
           const Text('All Signals', style: TextStyle(color: Color(0xFFD4D4D8), fontSize: 14, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           Container(
@@ -348,10 +334,11 @@ class _GnssStatusScreenState extends State<GnssStatusScreen>
 
   Widget _constellationIcon(String name) {
     final icons = {
-      'GPS': '🇺🇸', 'GLONASS': '🇷🇺', 'Galileo': '🇪🇺',
-      'BeiDou': '🇨🇳', 'QZSS': '🇯🇵', 'NavIC': '🇮🇳', 'SBAS': '🛰️',
+      'GPS': '\u{1F1FA}\u{1F1F8}', 'GLONASS': '\u{1F1F7}\u{1F1FA}',
+      'Galileo': '\u{1F1EA}\u{1F1FA}', 'BeiDou': '\u{1F1E8}\u{1F1F3}',
+      'QZSS': '\u{1F1EF}\u{1F1F5}', 'NavIC': '\u{1F1EE}\u{1F1F3}', 'SBAS': '\u{1F6F0}\uFE0F',
     };
-    return Text(icons[name] ?? '🛰️', style: const TextStyle(fontSize: 18));
+    return Text(icons[name] ?? '\u{1F6F0}\uFE0F', style: const TextStyle(fontSize: 18));
   }
 
   Color _constellationColor(String name) {

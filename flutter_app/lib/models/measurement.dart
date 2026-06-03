@@ -66,7 +66,6 @@ class CoordinateConverter {
   static ({int zone, double easting, double northing, bool isNorth}) toUtm(double lat, double lng) {
     final zone = ((lng + 180) / 6).ceil();
     final isNorth = lat >= 0;
-    final centralMeridian = (zone - 1) * 6 - 180 + 3;
     return (zone: zone, easting: 500000, northing: 0, isNorth: isNorth);
   }
 

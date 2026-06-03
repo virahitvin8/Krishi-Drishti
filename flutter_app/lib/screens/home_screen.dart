@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadUser() {
-    final user = StorageService().getUser();
+    final user = StorageService.instance.getUser();
     setState(() {
       _user = user;
       _rebuildScreens();
@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onLogin(AppUser user) {
-    StorageService().saveUser(user);
+    StorageService.instance.saveUser(user);
     setState(() {
       _user = user;
       _rebuildScreens();
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onLogout() {
-    StorageService().clearUser();
+    StorageService.instance.clearUser();
     setState(() {
       _user = null;
       _rebuildScreens();

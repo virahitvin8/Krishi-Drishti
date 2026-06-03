@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -124,7 +123,7 @@ class GeofenceService {
         _dwellStart[fence.id] = now;
 
         // Check dwell time
-        Timer(const Duration(milliseconds: (fence.dwellTimeSeconds * 1000).toInt()), () {
+        Timer(Duration(milliseconds: (fence.dwellTimeSeconds * 1000).toInt()), () {
           final dwellStart = _dwellStart[fence.id];
           if (dwellStart != null && DateTime.now().difference(dwellStart).inSeconds >= fence.dwellTimeSeconds.toInt()) {
             if (_insideFence[fence.id] == true) {
@@ -212,7 +211,7 @@ class GeofenceService {
   List<Geofence> getFencesNear(double lat, double lng, double radiusMeters) {
     return _fences.where((f) {
       if (f.type == GeofenceType.circular && f.latitude != null && f.longitude != null) {
-        final dist = Geofence._haversine(lat, lng, f.latitude!, f.longitude!);
+        final dist = Geofence.haversine(lat, lng, f.latitude!, f.longitude!);
         return dist <= radiusMeters + (f.radiusMeters ?? 0);
       }
       return f.containsPoint(lat, lng);

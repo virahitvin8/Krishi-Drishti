@@ -24,8 +24,6 @@ class _MeasurementScreenState extends State<MeasurementScreen> with SingleTicker
   List<({double lat, double lng})> _measurePoints = [];
   Position? _currentPosition;
   FieldMeasurement? _lastMeasurement;
-  bool _isMeasuring = false;
-
   @override
   void initState() {
     super.initState();
@@ -109,7 +107,7 @@ class _MeasurementScreenState extends State<MeasurementScreen> with SingleTicker
             icon: Icons.show_chart,
             label: 'Measure Distance',
             desc: _measurePoints.length >= 2
-                ? '${CoordinateConverter._haversine(_measurePoints[0].lat, _measurePoints[0].lng, _measurePoints[1].lat, _measurePoints[1].lng).toStringAsFixed(0)}m'
+                ? '${CoordinateConverter.haversine(_measurePoints[0].lat, _measurePoints[0].lng, _measurePoints[1].lat, _measurePoints[1].lng).toStringAsFixed(0)}m'
                 : 'Will use current position',
             action: 'Measure',
             color: const Color(0xFF60A5FA),

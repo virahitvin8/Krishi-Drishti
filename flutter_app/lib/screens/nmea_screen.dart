@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/raw_gnss_service.dart';
 import '../services/gps_service.dart';
 import '../models/gnss_satellite.dart';
-import '../widgets/sky_plot.dart';
 
 /// Advanced NMEA + GNSS status screen - inspired by GPSTest and Google GPS Measurement Tools
 /// Shows raw NMEA sentences, DOP values, satellite constellations, and fix quality
@@ -256,7 +256,7 @@ class _NmeaScreenState extends State<NmeaScreen> with SingleTickerProviderStateM
       children: [
         Expanded(
           child: CustomPaint(
-            painter: SkyPlotPainter(satellites: _satellites),
+            painter: _NmeaSkyPlotPainter(satellites: _satellites),
             size: Size.infinite,
           ),
         ),
@@ -371,9 +371,7 @@ class _NmeaScreenState extends State<NmeaScreen> with SingleTickerProviderStateM
       case 'NavIC': return const Color(0xFFF97316);
       default: return const Color(0xFF71717A);
     }
-  }
-
-  @override
+  }  @override
   void dispose() {
     _tabController.dispose();
     _satSub?.cancel();
@@ -383,3 +381,46 @@ class _NmeaScreenState extends State<NmeaScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 }
+
+/// Simple sky plot painter for NMEA screen
+class _NmeaSkyPlotPainter extends CustomPainter {
+  final List<GnssSatellite> satellites;
+
+  _NmeaSkyPlotPainter({required this.satellites});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 20;
+    final paint = Paint();
+
+    // Draw elevation circles
+    for (int i = 1; i <= 3; i++) {
+      final r = radius * (1 - i * 0.25);
+      paint.color = const Color(0xFF27272A);
+      paint.style = PaintingStyle.stroke;
+      paint.strokeWidth = 1;
+      canvas.drawCircle(center, r, paint);
+    }
+
+    // Draw satellites
+    for (final sat in satellites) {
+      final azimRad = sat.azimuth * 3.14159 / 180;
+      final distFromCenter = radius * (1 - sat.elevation / 90);
+
+      final x = center.dx + math.sin(azimRad) * distFromCenter;
+      final y = center.dy - math.cos(azimRad) * distFromCenter;
+      final dotRadius = 4.0 + (sat.snr / 40) * 4;
+      final color = Color(sat.constellationColor);
+
+      final dotPaint = Paint()
+        ..color = color.withValues(alpha: sat.usedInFix ? 1.0 : 0.5);
+      canvas.drawCircle(Offset(x, y), dotRadius, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _NmeaSkyPlotPainter oldDelegate) => true;
+}
+
+

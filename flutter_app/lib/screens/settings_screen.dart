@@ -30,7 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _loadPrefs() {
-    final prefs = StorageService().getPreferences();
+    final prefs = StorageService.instance.getPreferences();
     setState(() {
       _autoRefresh = prefs['autoRefresh'] ?? true;
       _notifications = prefs['notifications'] ?? true;
@@ -48,13 +48,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     if (widget.user != null) {
-      widget.user!.displayName = newName;
       widget.user!.language = _language;
       widget.user!.state = _state;
-      await StorageService().saveUser(widget.user!);
+      await StorageService.instance.saveUser(widget.user!);
     }
 
-    await StorageService().savePreferences({
+    await StorageService.instance.savePreferences({
       'autoRefresh': _autoRefresh,
       'notifications': _notifications,
       'saveHistory': _saveHistory,
@@ -100,7 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: _language,
+                    initialValue: _language,
                     dropdownColor: const Color(0xFF18181B),
                     style: const TextStyle(color: Colors.white),
                     decoration: _inputDecoration('Language', Icons.language),
@@ -113,7 +112,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: _state.isEmpty ? null : _state,
+                    initialValue: _state.isEmpty ? null : _state,
                     dropdownColor: const Color(0xFF18181B),
                     style: const TextStyle(color: Colors.white),
                     decoration: _inputDecoration('State', Icons.location_city),
@@ -285,7 +284,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF2E7D32),
+            activeThumbColor: const Color(0xFF2E7D32),
           ),
         ],
       ),

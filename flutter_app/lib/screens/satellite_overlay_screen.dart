@@ -143,14 +143,14 @@ class _SatelliteOverlayScreenState extends State<SatelliteOverlayScreen> with Si
                       Container(
                         width: 44, height: 44,
                         decoration: BoxDecoration(
-                          color: Color(int.parse(scene.sourceColor.replaceAll('#', '0xFF'))).withValues(alpha: 0.15),
+                          color: _parseHexColor(scene.sourceColor).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Center(
                           child: Text(scene.source == SatelliteSource.sentinel2 ? 'S2' :
                               scene.source == SatelliteSource.landsat8 ? 'L8' : 'L9',
                               style: TextStyle(
-                                color: Color(int.parse(scene.sourceColor.replaceAll('#', '0xFF'))),
+                                color: _parseHexColor(scene.sourceColor),
                                 fontSize: 14, fontWeight: FontWeight.bold,
                               )),
                         ),
@@ -169,7 +169,7 @@ class _SatelliteOverlayScreenState extends State<SatelliteOverlayScreen> with Si
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('${scene.cloudCover.toStringAsFixed(0)}% cloud', style: const TextStyle(
+                          Text('${scene.cloudCover.toStringAsFixed(0)}% cloud', style: TextStyle(
                             color: scene.cloudCover < 20 ? const Color(0xFF4ADE80) :
                                    scene.cloudCover < 50 ? const Color(0xFFFBBF24) :
                                    const Color(0xFFEF4444),
@@ -448,7 +448,7 @@ class _SatelliteOverlayScreenState extends State<SatelliteOverlayScreen> with Si
                 Align(
                   alignment: width < 0 ? Alignment.centerLeft : Alignment.centerRight,
                   child: Container(
-                    width: width.abs(),
+                    width: (width.abs()).toDouble(),
                     height: 8,
                     color: changePercent >= 0 ? const Color(0xFF4ADE80) : const Color(0xFFEF4444),
                   ),
@@ -461,6 +461,10 @@ class _SatelliteOverlayScreenState extends State<SatelliteOverlayScreen> with Si
         Text('% Change', style: const TextStyle(color: Color(0xFF71717A), fontSize: 10)),
       ],
     );
+  }
+
+  Color _parseHexColor(String hex) {
+    return Color(int.parse(hex.replaceAll('#', '0xFF')));
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../services/geofence_service.dart';
@@ -72,7 +72,7 @@ class _GeofenceScreenState extends State<GeofenceScreen> with SingleTickerProvid
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<GeofenceType>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   dropdownColor: const Color(0xFF27272A),
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
@@ -261,7 +261,7 @@ class _GeofenceScreenState extends State<GeofenceScreen> with SingleTickerProvid
                   Expanded(child: Text(fence.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600))),
                   Switch(
                     value: fence.enabled,
-                    activeColor: const Color(0xFF2E7D32),
+                    activeThumbColor: const Color(0xFF2E7D32),
                     onChanged: (v) async {
                       final updated = Geofence(
                         id: fence.id, name: fence.name, type: fence.type,
@@ -330,8 +330,8 @@ class _GeofenceScreenState extends State<GeofenceScreen> with SingleTickerProvid
     const segments = 32;
     final points = List.generate(segments, (i) {
       final angle = (i * 360 / segments) * 3.14159 / 180;
-      final dlat = (fence.radiusMeters! / 111320) * angle.cos();
-      final dlng = (fence.radiusMeters! / (111320 * (fence.latitude! * 3.14159 / 180).cos())) * angle.sin();
+      final dlat = (fence.radiusMeters! / 111320) * math.cos(angle);
+      final dlng = (fence.radiusMeters! / (111320 * math.cos(fence.latitude! * 3.14159 / 180))) * math.sin(angle);
       return LatLng(fence.latitude! + dlat, fence.longitude! + dlng);
     });
     return Polygon(

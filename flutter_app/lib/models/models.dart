@@ -1,7 +1,7 @@
 /// Data models for Krishi Drishti
 library models;
 
-export 'analysis.dart';
+export 'analysis.dart' hide SatelliteSource;
 export 'user.dart';
 export 'farm.dart';
 export 'track.dart';

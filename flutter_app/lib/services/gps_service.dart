@@ -47,12 +47,7 @@ class GpsService {
     if (!hasPermission) return null;
 
     try {
-      _currentPosition = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 10, // Update every 10 meters
-        ),
-      );
+      _currentPosition = await Geolocator.getCurrentPosition();
       return _currentPosition;
     } catch (e) {
       debugPrint('Error getting location: $e');

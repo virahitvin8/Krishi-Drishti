@@ -96,8 +96,7 @@ class _SurveyScreenState extends State<SurveyScreen> with SingleTickerProviderSt
                 decoration: BoxDecoration(
                   color: const Color(0xFF2E7D32).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(14),
-                ),
-                child: Center(child: Text(template.type.icon, style: const TextStyle(fontSize: 24))),
+                ),                        child: Center(child: Text(surveyTypeIcon(template.type), style: const TextStyle(fontSize: 24))),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -242,8 +241,7 @@ class _SurveyFormScreenState extends State<_SurveyFormScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF09090B),
-      appBar: AppBar(
-        title: Text('${template.type.icon} ${template.name}'),
+      appBar: AppBar(                  title: Text('${surveyTypeIcon(template.type)} ${template.name}'),
         actions: [
           _saving
               ? const Padding(padding: EdgeInsets.all(16), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
@@ -312,7 +310,7 @@ class _SurveyFormScreenState extends State<_SurveyFormScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('${field.label}${field.required ? ' *' : ''}',
-              style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: field.required ? FontWeight.w600 : FontWeight.normal)),
+              style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: field.required ? FontWeight.w600 : FontWeight.normal)),
           const SizedBox(height: 8),
           switch (field.fieldType) {
             SurveyFieldType.text => TextField(
@@ -350,7 +348,7 @@ class _SurveyFormScreenState extends State<_SurveyFormScreen> {
             SurveyFieldType.rating => Row(
                 children: List.generate(5, (i) => IconButton(
                   icon: Icon(
-                    i < (_formData[field.key] ?? 0) ? Icons.star : Icons.star_border,
+                    i < ((_formData[field.key] ?? 0) as int) ? Icons.star : Icons.star_border,
                     color: const Color(0xFFFBBF24),
                   ),
                   onPressed: () => setState(() => _formData[field.key] = i + 1),

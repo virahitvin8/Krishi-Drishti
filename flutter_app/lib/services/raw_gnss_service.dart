@@ -132,14 +132,14 @@ class RawGnssService {
     for (final item in data) {
       if (item is Map) {
         newSats.add(GnssSatellite(
-          prn: (item['prn'] as num?)?.toInt() ?? 0,
-          constellation: item['constellation'] as String? ?? 'Unknown',
+          prn: ((item['prn'] as num?)?.toInt() ?? 0),
+          constellation: (item['constellation'] as String?) ?? 'Unknown',
           snr: (item['snr'] as num?)?.toDouble() ?? 0.0,
           elevation: (item['elevation'] as num?)?.toDouble() ?? 0.0,
           azimuth: (item['azimuth'] as num?)?.toDouble() ?? 0.0,
-          usedInFix: item['usedInFix'] as bool? ?? false,
-          hasEphemeris: item['hasEphemeris'] as bool? ?? false,
-          hasAlmanac: item['hasAlmanac'] as bool? ?? false,
+          usedInFix: (item['usedInFix'] as bool?) ?? false,
+          hasEphemeris: (item['hasEphemeris'] as bool?) ?? false,
+          hasAlmanac: (item['hasAlmanac'] as bool?) ?? false,
           frequencyBand: item['frequencyBand'] as String?,
         ));
       }
@@ -203,7 +203,8 @@ class RawGnssService {
     var prnIdx = 0;
 
     for (final entry in constellations.entries) {
-      for (int i = 0; i < entry.value['count'] && prnIdx < 40; i++) {
+      final count = entry.value['count'] ?? 0;
+      for (int i = 0; i < count && prnIdx < 40; i++) {
         prnIdx++;
         final baseSnr = (entry.value['snrBase'] as int).toDouble();
         final snr = (baseSnr + random.nextDouble() * 15 - 5) * fixQuality;
@@ -211,7 +212,7 @@ class RawGnssService {
         final azimuth = random.nextDouble() * 360;
 
         newSats.add(GnssSatellite(
-          prn: entry.value['prnBase'] + i,
+          prn: (entry.value['prnBase'] ?? 0) + i,
           constellation: entry.key,
           snr: double.parse(snr.toStringAsFixed(1)),
           elevation: double.parse(elevation.toStringAsFixed(1)),
@@ -255,16 +256,13 @@ class RawGnssService {
     final latMin = (latDeg - latD) * 60;
     final lngMin = (lngDeg - lngD) * 60;
 
-    final gpgga = '\$GPGGA,$timeStr,'
-        '${latD.toString().padLeft(2, '0')}${latMin.toStringAsFixed(4).padLeft(9, '0')},$latDir,'
-        '${lngD.toString().padLeft(3, '0')}${lngMin.toStringAsFixed(4).padLeft(9, '0')},$lngDir,'
-        '1,$satsUsed,${_currentDop.hdop.toStringAsFixed(1)},'
-        '${alt.toStringAsFixed(1)},M,0.0,M,,*'
-        '${_checksum('\$GPGGA,$timeStr,'
-        '${latD.toString().padLeft(2, '0')}${latMin.toStringAsFixed(4).padLeft(9, '0')},$latDir,'
-        '${lngD.toString().padLeft(3, '0')}${lngMin.toStringAsFixed(4).padLeft(9, '0')},$lngDir,'
-        '1,$satsUsed,${_currentDop.hdop.toStringAsFixed(1)},'
-        '${alt.toStringAsFixed(1)},M,0.0,M,,')}';
+    final ggastr = StringBuffer('\$GPGGA,')
+      ..write('$timeStr,')
+      ..write('${latD.toString().padLeft(2, '0')}${latMin.toStringAsFixed(4).padLeft(9, '0')},$latDir,')
+      ..write('${lngD.toString().padLeft(3, '0')}${lngMin.toStringAsFixed(4).padLeft(9, '0')},$lngDir,')
+      ..write('1,$satsUsed,${_currentDop.hdop.toStringAsFixed(1)},')
+      ..write('${alt.toStringAsFixed(1)},M,0.0,M,,');
+    final gpgga = '${ggastr.toString()}*${_checksum(ggastr.toString())}';
 
     // $GPGSA
     final satIds = _satellites.where((s) => s.usedInFix).map((s) => s.prn.toString()).toList();
@@ -295,7 +293,7 @@ class RawGnssService {
   String _checksum(String sentence) {
     int ck = 0;
     for (int i = 0; i < sentence.length; i++) {
-      ck ^= sentence.codeUnitAt(i);
+      if (i < sentence.length) ck ^= sentence.codeUnitAt(i);
     }
     return ck.toRadixString(16).toUpperCase().padLeft(2, '0');
   }
@@ -312,7 +310,7 @@ class RawGnssService {
     }
 
     double sumCos2El = 0, sumSin2El = 0;
-    double sumCos2Az = 0, sumSin2Az = 0;
+    double sumCos2Az = 0;
 
     for (final sat in usedSats) {
       final elRad = sat.elevation * math.pi / 180;
@@ -320,7 +318,6 @@ class RawGnssService {
       sumCos2El += math.cos(elRad) * math.cos(elRad);
       sumSin2El += math.sin(elRad) * math.sin(elRad);
       sumCos2Az += math.cos(azRad) * math.cos(azRad);
-      sumSin2Az += math.sin(azRad) * math.sin(azRad);
     }
 
     final n = usedSats.length.toDouble();

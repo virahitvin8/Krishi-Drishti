@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/survey_point.dart';
@@ -13,8 +13,6 @@ class SurveyService {
   static final SurveyService _instance = SurveyService._();
   factory SurveyService() => _instance;
   SurveyService._();
-
-  final List<SurveyPoint> _pendingSync = [];
 
   // Stream for real-time survey updates
   final _surveyController = StreamController<List<SurveyPoint>>.broadcast();
@@ -162,11 +160,11 @@ class SurveyService {
     const R = 6371000.0;
     final dLat = (lat2 - lat1) * 3.141592653589793 / 180;
     final dLon = (lon2 - lon1) * 3.141592653589793 / 180;
-    final a = (dLat / 2).sin() * (dLat / 2).sin() +
-        (lat1 * 3.141592653589793 / 180).cos() *
-        (lat2 * 3.141592653589793 / 180).cos() *
-        (dLon / 2).sin() * (dLon / 2).sin();
-    return R * 2 * a.sqrt().atan2((1 - a).sqrt());
+    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1 * 3.141592653589793 / 180) *
+        math.cos(lat2 * 3.141592653589793 / 180) *
+        math.sin(dLon / 2) * math.sin(dLon / 2);
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
   }
 
   void dispose() {

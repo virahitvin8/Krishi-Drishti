@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/measurement.dart';
 
@@ -14,7 +12,6 @@ class MeasurementService {
   MeasurementService._();
 
   final List<FieldMeasurement> _history = [];
-  Position? _lastPosition;
 
   // Observable
   final _measurementController = StreamController<FieldMeasurement>.broadcast();
@@ -50,10 +47,13 @@ class MeasurementService {
 
   /// Measure distance between two points
   FieldMeasurement measureDistance(
-    double lat1, double lon1, double lat2, double lon2,
-    {String name = 'Distance'},
-  ) {
-    final meters = CoordinateConverter._haversine(lat1, lon1, lat2, lon2);
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2, {
+    String name = 'Distance',
+  }) {
+    final meters = CoordinateConverter.haversine(lat1, lon1, lat2, lon2);
     final bearing = CoordinateConverter.bearing(lat1, lon1, lat2, lon2);
 
     final measurement = FieldMeasurement(
@@ -88,9 +88,11 @@ class MeasurementService {
 
     for (int i = 0; i < points.length; i++) {
       if (i > 0) {
-        totalDist += CoordinateConverter._haversine(
-          points[i - 1].lat, points[i - 1].lng,
-          points[i].lat, points[i].lng,
+        totalDist += CoordinateConverter.haversine(
+          points[i - 1].lat,
+          points[i - 1].lng,
+          points[i].lat,
+          points[i].lng,
         );
       }
       profile.add((distance: totalDist, elevation: points[i].elevation ?? 0));
@@ -102,7 +104,7 @@ class MeasurementService {
   /// Get coordinate in multiple formats
   Map<String, String> formatCoordinate(double lat, double lng) {
     return {
-      'dd': '${lat.toStringAsFixed(6)}°, ${lng.toStringAsFixed(6)}°',
+      'dd': '${lat.toStringAsFixed(6)}\u00B0, ${lng.toStringAsFixed(6)}\u00B0',
       'dms': '${CoordinateConverter.toDms(lat, true)} ${CoordinateConverter.toDms(lng, false)}',
       'mgrs': CoordinateConverter.toMgrs(lat, lng),
       'utm': _formatUtm(lat, lng),
@@ -117,8 +119,10 @@ class MeasurementService {
 
   /// Get current heading/compass direction
   String getHeadingDirection(double bearingDegrees) {
-    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-                        'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    const directions = [
+      'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+      'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
+    ];
     final index = ((bearingDegrees + 11.25) / 22.5).floor() % 16;
     return directions[index];
   }
@@ -132,12 +136,12 @@ class MeasurementService {
       _history.addAll(saved.map((s) {
         final map = jsonDecode(s) as Map<String, dynamic>;
         return FieldMeasurement(
-          id: map['id'],
-          name: map['name'],
+          id: map['id'] as String,
+          name: map['name'] as String,
           value: (map['value'] as num).toDouble(),
           unit: MeasurementUnit.values.firstWhere((e) => e.name == map['unit']),
           type: MeasurementType.values.firstWhere((e) => e.name == map['type']),
-          timestamp: DateTime.parse(map['timestamp']),
+          timestamp: DateTime.parse(map['timestamp'] as String),
           metadata: map['metadata'] as Map<String, dynamic>?,
         );
       }));
@@ -151,8 +155,11 @@ class MeasurementService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final data = _history.map((m) => jsonEncode({
-        'id': m.id, 'name': m.name, 'value': m.value,
-        'unit': m.unit.name, 'type': m.type.name,
+        'id': m.id,
+        'name': m.name,
+        'value': m.value,
+        'unit': m.unit.name,
+        'type': m.type.name,
         'timestamp': m.timestamp.toIso8601String(),
         'metadata': m.metadata,
       })).toList();

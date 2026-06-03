@@ -108,7 +108,7 @@ class EnhancedTrackingService {
     // Start position stream
     _positionStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
-        accuracy: _batteryOptimized ? LocationAccuracy.balanced : LocationAccuracy.high,
+        accuracy: _batteryOptimized ? LocationAccuracy.medium : LocationAccuracy.high,
         distanceFilter: _batteryOptimized ? _logDistanceMeters.toInt() : 0,
       ),
     ).listen(_onPositionUpdate);

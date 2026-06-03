@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 import '../services/gps_service.dart';
 import '../services/api_service.dart';
 import '../models/analysis.dart';
@@ -345,7 +344,7 @@ class _MapScreenState extends State<MapScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: _buildControlButton(
-                        icon: Icons.demo,
+                        icon: Icons.map_outlined,
                         label: 'Demo Field',
                         onTap: _createDemoField,
                       ),

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/gnss_satellite.dart';
 

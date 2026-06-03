@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/track_service.dart';
 import '../models/track.dart';
-import '../services/storage_service.dart';
 
 /// GPS Track Recorder Screen — inspired by OSMTracker and GPSLogger
 /// Features: start/stop/pause recording, waypoints, configurable logging, saved tracks
@@ -196,8 +195,8 @@ class _TrackRecorderScreenState extends State<TrackRecorderScreen>
                             builder: (_) => AlertDialog(
                               backgroundColor: const Color(0xFF18181B),
                               title: const Text('Stop Recording?', style: TextStyle(color: Colors.white)),
-                              content: const Text('${_currentTrack?.pointCount ?? 0} points recorded.',
-                                  style: TextStyle(color: Color(0xFFA1A1AA))),
+                              content: Text('${_currentTrack?.pointCount ?? 0} points recorded.',
+                                  style: const TextStyle(color: Color(0xFFA1A1AA))),
                               actions: [
                                 TextButton(onPressed: () => Navigator.pop(context, false),
                                     child: const Text('Cancel')),
