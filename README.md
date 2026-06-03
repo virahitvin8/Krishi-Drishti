@@ -104,6 +104,9 @@
 | 🌐 | **Multi-lingual** | English, हिन्दी, తెలుగు — with more coming soon |
 | 📈 | **Grafana Dashboard** | Real-time monitoring with interactive visualizations |
 | 💾 | **Save & Track Farms** | Save farm locations and track health over time |
+| 🌾 | **Farming Advisory** | Crop calendar, sowing/harvest timing, fertilizer schedules |
+| 🏪 | **Nearby Services** | GIS map of KBTs, seed shops, fertilizer & pesticide stores |
+| 🐛 | **Pest Management** | Detailed organic & chemical control for blast, rust, bollworm, mildew |
 
 </div>
 

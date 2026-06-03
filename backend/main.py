@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import APP_NAME, APP_VERSION
 from .services.scheduler import start_scheduler, stop_scheduler
-from .routers import analysis, translation, grafana, user, quantum
+from .routers import analysis, translation, grafana, user, quantum, farming_advisory
 
 # Configure logging
 logging.basicConfig(
@@ -76,6 +76,7 @@ app.include_router(translation.router)
 app.include_router(grafana.router)
 app.include_router(user.router)
 app.include_router(quantum.router)
+app.include_router(farming_advisory.router)
 
 
 # --- Health Check Endpoints ---
