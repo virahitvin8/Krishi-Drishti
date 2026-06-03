@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dashboard_screen.dart';
 import 'map_screen.dart';
 import 'saved_farms_screen.dart';
+import 'tools_screen.dart';
 import 'settings_screen.dart';
 import '../services/storage_service.dart';
 import '../models/user.dart';
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _screens.addAll([
       DashboardScreen(user: _user),
       const MapScreen(),
+      const ToolsScreen(),
       SavedFarmsScreen(user: _user, onFarmSelected: _onFarmSelected),
       SettingsScreen(user: _user, onLogout: _onLogout),
     ]);
@@ -96,6 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.map_outlined),
               activeIcon: Icon(Icons.map),
               label: 'Map',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.build_outlined),
+              activeIcon: Icon(Icons.build),
+              label: 'Tools',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.bookmark_outline),
