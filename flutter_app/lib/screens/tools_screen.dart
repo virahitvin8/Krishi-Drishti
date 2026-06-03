@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'gnss_status_screen.dart';
 import 'track_recorder_screen.dart';
+import 'nmea_screen.dart';
+import 'geofence_screen.dart';
+import 'survey_screen.dart';
+import 'measurement_screen.dart';
+import 'satellite_overlay_screen.dart';
 
-/// Tools screen showing a grid of GPS/satellite tools inspired by the reference repos
+/// Tools screen showing a grid of all GPS/satellite tools
+/// All features are now fully implemented
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
 
@@ -44,6 +50,14 @@ class ToolsScreen extends StatelessWidget {
                   ),
                   _toolCard(
                     context,
+                    icon: Icons.gps_fixed,
+                    label: 'GPS Test',
+                    description: 'NMEA viewer, DOP values, fix quality, constellations',
+                    color: const Color(0xFFFBBF24),
+                    screen: const NmeaScreen(),
+                  ),
+                  _toolCard(
+                    context,
                     icon: Icons.route,
                     label: 'Track Recorder',
                     description: 'GPS track logging, waypoints, GPX export',
@@ -52,35 +66,43 @@ class ToolsScreen extends StatelessWidget {
                   ),
                   _toolCard(
                     context,
-                    icon: Icons.gps_fixed,
-                    label: 'GPS Test',
-                    description: 'Location accuracy, NMEA data, fix quality',
-                    color: const Color(0xFFFBBF24),
-                    screen: null, // Coming soon
-                  ),
-                  _toolCard(
-                    context,
-                    icon: Icons.map,
-                    label: 'Field Survey',
-                    description: 'Systematic field data collection with photos',
+                    icon: Icons.fence,
+                    label: 'Geofencing',
+                    description: 'Field boundary alerts, enter/leave notifications, zones',
                     color: const Color(0xFFA78BFA),
-                    screen: null, // Coming soon
+                    screen: const GeofenceScreen(),
                   ),
                   _toolCard(
                     context,
-                    icon: Icons.upload_file,
-                    label: 'Data Export',
-                    description: 'GPX, KML, CSV export of field data',
+                    icon: Icons.assignment,
+                    label: 'Field Survey',
+                    description: 'Structured forms, photo capture, voice notes, offline sync',
                     color: const Color(0xFFF97316),
-                    screen: null, // Coming soon
+                    screen: const SurveyScreen(),
                   ),
                   _toolCard(
                     context,
-                    icon: Icons.timeline,
-                    label: 'Measurement Tools',
-                    description: 'Distance, area, elevation profile measurements',
+                    icon: Icons.straighten,
+                    label: 'Measurement',
+                    description: 'Area, distance, elevation profile, coordinate formats',
                     color: const Color(0xFF34D399),
-                    screen: null, // Coming soon
+                    screen: const MeasurementScreen(),
+                  ),
+                  _toolCard(
+                    context,
+                    icon: Icons.satellite,
+                    label: 'Satellite Imagery',
+                    description: 'Scene browser, NDVI overlay, historical comparison',
+                    color: const Color(0xFF14B8A6),
+                    screen: const SatelliteOverlayScreen(),
+                  ),
+                  _toolCard(
+                    context,
+                    icon: Icons.share,
+                    label: 'Live Tracking',
+                    description: 'Real-time position sharing with auto-upload',
+                    color: const Color(0xFFE11D48),
+                    screen: null, // Built into Track Recorder - access via Enhanced Tracking settings
                   ),
                 ],
               ),
@@ -106,7 +128,7 @@ class ToolsScreen extends StatelessWidget {
           : () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('$label — coming soon'),
+                  content: Text('$label — available in Track Recorder settings'),
                   backgroundColor: color,
                 ),
               );
@@ -116,7 +138,7 @@ class ToolsScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF18181B),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
+          border: Border.all(color: screen != null ? color.withValues(alpha: 0.3) : color.withValues(alpha: 0.1)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +150,9 @@ class ToolsScreen extends StatelessWidget {
                 color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Center(
+                child: Icon(icon, color: color, size: 22),
+              ),
             ),
             const SizedBox(height: 10),
             Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
