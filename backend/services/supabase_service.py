@@ -28,7 +28,9 @@ _memory_store: Dict[str, List[Dict[str, Any]]] = {
     "analyses": [],
     "field_profiles": [],
     "csv_batches": [],
-    "schedules": []
+    "schedules": [],
+    "users": [],
+    "user_fields": []
 }
 
 
@@ -259,6 +261,120 @@ async def update_schedule_run(schedule_id: str) -> None:
 
 
 # --- Dashboard Data ---
+
+# ============================================================
+# USER PROFILE FUNCTIONS
+# ============================================================
+
+async def save_user_profile(user_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Save a new user profile."""
+    username = user_data.get("username")
+    if not username:
+        raise ValueError("Username is required")
+    
+    user_data["created_at"] = datetime.utcnow().isoformat()
+    user_data["last_login"] = datetime.utcnow().isoformat()
+    user_data["preferences"] = user_data.get("preferences", {})
+    user_data["saved_fields"] = []
+    user_data["total_analyses"] = 0
+    
+    if _supabase:
+        try:
+            result = _supabase.table("user_profiles").insert(user_data).execute()
+            return result.data[0] if result.data else user_data
+        except Exception as e:
+            logger.error(f"Supabase error saving user: {e}")
+    
+    # Check existing
+    for u in _memory_store["users"]:
+        if u.get("username") == username:
+            raise ValueError(f"User '{username}' already exists")
+    
+    _memory_store["users"].append(user_data)
+    return user_data
+
+
+async def get_user_profile(username: str) -> Optional[Dict[str, Any]]:
+    """Get a user profile by username."""
+    if _supabase:
+        try:
+            result = _supabase.table("user_profiles").select("*").eq("username", username).execute()
+            if result.data:
+                user = result.data[0]
+                # Get saved fields
+                fields = await get_user_fields(username)
+                user["saved_fields"] = fields
+                return user
+        except Exception as e:
+            logger.error(f"Supabase error fetching user: {e}")
+    
+    for u in _memory_store["users"]:
+        if u.get("username") == username:
+            user = dict(u)
+            user["saved_fields"] = [f for f in _memory_store["user_fields"] if f.get("username") == username]
+            return user
+    return None
+
+
+async def update_user_profile(username: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+    """Update a user profile."""
+    if _supabase:
+        try:
+            result = _supabase.table("user_profiles").update(updates).eq("username", username).execute()
+            if result.data:
+                return result.data[0]
+        except Exception as e:
+            logger.error(f"Supabase error updating user: {e}")
+    
+    for u in _memory_store["users"]:
+        if u.get("username") == username:
+            u.update(updates)
+            return u
+    raise ValueError(f"User '{username}' not found")
+
+
+async def save_user_field(username: str, field_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Save a field to user's saved fields."""
+    field_data["username"] = username
+    field_data["saved_at"] = datetime.utcnow().isoformat()
+    
+    if _supabase:
+        try:
+            result = _supabase.table("saved_fields").insert(field_data).execute()
+            return result.data[0] if result.data else field_data
+        except Exception as e:
+            logger.error(f"Supabase error saving field: {e}")
+    
+    _memory_store["user_fields"].append(field_data)
+    return field_data
+
+
+async def get_user_fields(username: str) -> List[Dict[str, Any]]:
+    """Get all saved fields for a user."""
+    if _supabase:
+        try:
+            result = _supabase.table("saved_fields").select("*").eq("username", username).order("saved_at", desc=True).execute()
+            return result.data or []
+        except Exception as e:
+            logger.error(f"Supabase error fetching fields: {e}")
+    
+    return [f for f in _memory_store["user_fields"] if f.get("username") == username]
+
+
+async def delete_user_field(username: str, field_id: str) -> None:
+    """Delete a saved field."""
+    if _supabase:
+        try:
+            _supabase.table("saved_fields").delete().eq("username", username).eq("field_id", field_id).execute()
+            return
+        except Exception as e:
+            logger.error(f"Supabase error deleting field: {e}")
+    
+    _memory_store["user_fields"] = [
+        f for f in _memory_store["user_fields"]
+        if not (f.get("username") == username and f.get("field_id") == field_id)
+    ]
+
 
 async def get_dashboard_stats() -> Dict[str, Any]:
     """Get aggregated dashboard statistics."""

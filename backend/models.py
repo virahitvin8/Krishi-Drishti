@@ -134,3 +134,52 @@ class DetailedReport(BaseModel):
     satellite_metadata: Dict[str, Any]
     historical_comparison: Optional[Dict[str, Any]] = None
     export_formats: List[str] = ["pdf", "csv", "json"]
+
+
+# ============================================================
+# USER PROFILE MODELS
+# ============================================================
+
+class UserProfileCreate(BaseModel):
+    """Request to create/register a user profile"""
+    username: str = Field(..., min_length=2, max_length=50, description="Unique username")
+    display_name: str = Field(..., min_length=1, max_length=100, description="Display name")
+    language: str = Field("en", description="Preferred language (en/hi/te)")
+    phone: Optional[str] = Field(None, description="Phone number")
+    state: Optional[str] = Field(None, description="State in India")
+
+
+class UserProfileUpdate(BaseModel):
+    """Request to update user profile"""
+    display_name: Optional[str] = None
+    language: Optional[str] = None
+    phone: Optional[str] = None
+    state: Optional[str] = None
+    preferences: Optional[Dict[str, Any]] = None
+
+
+class SavedField(BaseModel):
+    """A saved/analyzed field"""
+    field_id: str
+    name: str
+    latitude: float
+    longitude: float
+    crop_type: str = "general"
+    area_hectares: float = 1.0
+    last_health_score: float = 0
+    last_analyzed: str = ""
+    notes: Optional[str] = None
+
+
+class UserProfileResponse(BaseModel):
+    """User profile with saved fields"""
+    username: str
+    display_name: str
+    language: str
+    phone: Optional[str] = None
+    state: Optional[str] = None
+    preferences: Dict[str, Any] = {}
+    saved_fields: List[SavedField] = []
+    total_analyses: int = 0
+    created_at: str = ""
+    last_login: str = ""

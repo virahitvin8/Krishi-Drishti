@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import APP_NAME, APP_VERSION
 from .services.scheduler import start_scheduler, stop_scheduler
-from .routers import analysis, translation, grafana
+from .routers import analysis, translation, grafana, user
 
 # Configure logging
 logging.basicConfig(
@@ -74,6 +74,7 @@ app.add_middleware(
 app.include_router(analysis.router)
 app.include_router(translation.router)
 app.include_router(grafana.router)
+app.include_router(user.router)
 
 
 # --- Health Check Endpoints ---
