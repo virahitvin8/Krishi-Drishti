@@ -44,7 +44,6 @@ flutter pub get && flutter run
 - [🗺️ Maps & Layers Explained](#️-maps--layers-explained)
 - [⚡ Quantum Technology Integration](#-quantum-technology-integration)
 - [🔄 GitHub CI/CD Pipeline](#-github-cicd-pipeline)
-- [🐳 Harness CI Pipeline Setup](#-harness-ci-pipeline-setup)
 
 ---
 
@@ -61,9 +60,6 @@ KrishiDrishti_Final_v4/
 │   ├── 📄 banner.svg                    # Social preview banner for GitHub repo
 │   └── 📂 screenshots/
 │       └── 📄 placeholder.svg           # Placeholder screenshots for README
-│
-├── 📂 .harness/
-│   └── 📄 build-apk-pipeline.yaml       # Harness CI pipeline (alternative CI/CD)
 │
 ├── 📂 apk-release/                      # Contains the pre-built APK file
 │   └── 📄 krishi-drishti-debug.apk      # 📱 THE FILE YOU NEED TO INSTALL!
@@ -485,32 +481,6 @@ When you push a tag starting with `v` (like `v1.1.0`):
 3. ✅ GitHub Release is created
 4. ✅ APK is attached to the release
 5. ✅ Users can download from Releases page
-
----
-
-## 🐳 Harness CI Pipeline Setup
-
-### Prerequisites
-1. Create a [Harness](https://harness.io) free account
-2. Create a project named `KrishiDrishti`
-3. Connect your GitHub repository
-
-### Import the Pipeline
-1. Go to **Harness Dashboard → Pipelines**
-2. Click **Import Pipeline**
-3. Upload `KrishiDrishti_Final_v4/.harness/build-apk-pipeline.yaml`
-4. Create required connectors:
-   - **GitHub Connector:** Connect your GitHub repo
-   - **Docker Connector:** For pulling `ghcr.io/cirruslabs/flutter:3.44.1`
-   - **Harness Cloud Connector:** For build infrastructure
-
-### Pipeline Stages
-```
-1. Clone repository from GitHub
-2. Run in Docker container (Flutter + Android SDK)
-3. Build debug APK
-4. Upload APK as artifact
-```
 
 ---
 

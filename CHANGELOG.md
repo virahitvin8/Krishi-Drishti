@@ -13,19 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Complete SETUP_GUIDE.md** — Step-by-step guide covering directory structure, APK installation, feature walkthrough, maps & layers, quantum tech, CI/CD setup, and troubleshooting
 - **Animated SVG workflow diagram** — `workflow-overview.svg` showing full data flow from satellites → backend → app UI → deployment
 - **Quantum technology integration docs** — IBM Quantum, AWS Braket, Azure Quantum, Google Cirq integration guide with code examples
-- **Harness CI pipeline fix** — Resolved commit `8b044f1` failure (added `set -e`, timeout, license acceptance, APK verification, fixed GRADLE_OPTS escaping)
 - **Setup guide link** in main README for easy navigation
 - **Workflow diagram section** in README with visual overview
 - **Quantum section** in README with quick-start code example
+- **Complete frontend redesign** — Light theme, Copernicus-style layout, AOI drawing tools, layer manager
+- **Flutter app light theme** — Matching design with brand green (#2E7D32)
+- **APK rename** — Changed to `Krishi-Drishti-v1.1.0-debug.apk`
 
 ### Changed
 - README now links to SETUP_GUIDE.md for detailed instructions
 - `.gitignore` now tracks `pubspec.lock` for reproducible builds
 - Updated `CONTRIBUTING.md` with satellite-farming focus and emoji icons
+- Web app fully redesigned: professional light theme, full-screen map, AOI tools, layer manager
+- Flutter app updated with matching light theme
 
-### Fixed
-- Harness CI pipeline: `set -e`, timeout, GRADLE_OPTS escaping, Android license acceptance, APK verification
-- `.gitignore` pubspec.lock exclusion removed
+### Removed
+- Harness CI pipeline references from documentation (pipeline not in active use)
 
 ---
 

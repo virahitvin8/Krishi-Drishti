@@ -350,55 +350,40 @@ For a **complete, step-by-step guide** covering everything — directory structu
 ## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           KRISHI DRISHTI ARCHITECTURE                    │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌─────────────────────┐    ┌─────────────────────────────────────────┐ │
-│  │    CLIENT LAYER      │    │            API LAYER                    │ │
-│  │                      │    │                                         │ │
-│  │  ┌─────────────────┐ │    │  ┌─────────────────────────────────┐   │ │
-│  │  │  Flutter App     │ │    │  │  FastAPI Backend (Python)       │   │ │
-│  │  │  (Android/iOS)   │◄├───┼──┤  • Analysis Engine              │   │ │
-│  │  └─────────────────┘ │    │  │  • CDSE Integration             │   │ │
-│  │                      │    │  │  • GEE Integration              │   │ │
-│  │  ┌─────────────────┐ │    │  │  • ISRO Bhoonidhi              │   │ │
-│  │  │  PWA Web App     │ │    │  │  • Weather Service             │   │ │
-│  │  │  (Leaflet Map)   │◄├───┼──┤  • Translation Engine          │   │ │
-│  │  └─────────────────┘ │    │  │  • Grafana Query API           │   │ │
-│  │                      │    │  │  • User Management             │   │ │
-│  │  ┌─────────────────┐ │    │  │  • CSV Batch Processing        │   │ │
-│  │  │  Grafana Dash.   │ │    │  └─────────────────────────────────┘   │ │
-│  │  │  (Monitoring)    │◄├───┼────────────────────────────────────┘   │ │
-│  │  └─────────────────┘ │    │                                         │ │
-│  └─────────────────────┘    └─────────────────────────────────────────┘ │
-│                                                                          │
-│  ┌─────────────────────┐    ┌─────────────────────────────────────────┐ │
-│  │   SATELLITE SOURCES  │    │         STORAGE LAYER                  │ │
-│  │                      │    │                                         │ │
-│  │  🛰️ Sentinel-2 A/B   │    │  ┌─────────────────────────────────┐   │ │
-│  │  📡 Sentinel-1 SAR   │    │  │  Supabase (PostgreSQL)          │   │ │
-│  │  🌍 Landsat 8/9      │    │  │  • User profiles                │   │ │
-│  │  🇮🇳 ISRO Resourcesat│    │  │  • Saved farms                  │   │ │
-│  │  🌤️ NASA POWER       │    │  │  • Analysis history             │   │ │
-│  │  🌧️ Open-Meteo       │    │  └─────────────────────────────────┘   │ │
-│  │  🗺️ Copernicus DEM   │    │                                         │ │
-│  └─────────────────────┘    │  ┌─────────────────────────────────┐   │ │
-│                              │  │  Local Storage (PWA/Flutter)   │   │ │
-│                              │  │  • Farm cache                  │   │ │
-│                              │  │  • User preferences            │   │ │
-│                              │  └─────────────────────────────────┘   │ │
-│                              └─────────────────────────────────────────┘ │
-│                                                                          │
-│  ┌──────────────────────────────────────────────────────────────────┐   │
-│  │  DEPLOYMENT                                                      │   │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐│   │
-│  │  │  Netlify     │  │  Render      │  │  GitHub Actions        ││   │
-│  │  │  (Frontend)  │  │  (Backend)   │  │  (CI/CD + APK Build)   ││   │
-│  │  └──────────────┘  └──────────────┘  └────────────────────────┘│   │
-│  └──────────────────────────────────────────────────────────────────┘   │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                    KRISHI DRISHTI ARCHITECTURE                      │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────────────┐    ┌─────────────────────────────────┐    │
+│  │    CLIENT LAYER      │    │         API LAYER               │    │
+│  │                      │    │                                 │    │
+│  │  ┌─────────────────┐ │    │  ┌──────────────────────────┐  │    │
+│  │  │  Flutter App     │ │    │  │  FastAPI Backend         │  │    │
+│  │  │  (Android/iOS)   │◄├───┼──┤  • Analysis Engine        │  │    │
+│  │  └─────────────────┘ │    │  │  • CDSE Integration       │  │    │
+│  │                      │    │  │  • GEE Integration        │  │    │
+│  │  ┌─────────────────┐ │    │  │  • Weather Service        │  │    │
+│  │  │  PWA Web App     │ │    │  │  • Translation Engine     │  │    │
+│  │  │  (Leaflet Map)   │◄├───┼──┤  • User Management        │  │    │
+│  │  └─────────────────┘ │    │  │  • CSV Batch Processing   │  │    │
+│  │                      │    │  └──────────────────────────┘  │    │
+│  │  ┌─────────────────┐ │    │                                 │    │
+│  │  │  Grafana Dash.   │ │    │  ┌──────────────────────────┐  │    │
+│  │  │  (Monitoring)    │◄├───┼──┤  Supabase (PostgreSQL)    │  │    │
+│  │  └─────────────────┘ │    │  │  + Local Storage          │  │    │
+│  └─────────────────────┘    │  └──────────────────────────┘  │    │
+│                            └─────────────────────────────────┘    │
+│                                                                     │
+│  ┌─────────────────────┐    ┌─────────────────────────────────┐    │
+│  │   SATELLITE SOURCES  │    │         DEPLOYMENT             │    │
+│  │  🛰️ Sentinel-2 A/B   │    │  ┌────────┐ ┌──────┐ ┌─────┐ │    │
+│  │  📡 Sentinel-1 SAR   │    │  │Netlify │ │Render│ │GitHub│ │    │
+│  │  🌍 Landsat 8/9      │    │  │Frontend│ │Backend│ │Actions│ │    │
+│  │  🇮🇳 ISRO Resourcesat│    │  └────────┘ └──────┘ └─────┘ │    │
+│  │  🌤️ NASA POWER       │    └─────────────────────────────────┘    │
+│  │  🗺️ Copernicus DEM   │                                           │
+│  └─────────────────────┘                                           │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 <p align="right"><a href="#readme-top">⬆ Back to top</a></p>
@@ -467,7 +452,6 @@ For a **complete, step-by-step guide** covering everything — directory structu
   | [GitHub Actions](https://github.com/features/actions) | CI/CD — auto-build APK on push & tags |
   | [Netlify](https://netlify.com) | PWA hosting with automatic deploys |
   | [Render](https://render.com) | Backend hosting with health checks |
-  | [Harness CI](https://harness.io) | Alternative CI pipeline (free tier) |
   | [Grafana](https://grafana.com) | Real-time monitoring dashboard |
   
   <br>
@@ -700,27 +684,6 @@ git push origin feature/your-awesome-feature
 <p align="right"><a href="#readme-top">⬆ Back to top</a></p>
 
 ---
-
-## 🐳 Harness CI Pipeline
-
-Krishi Drishti supports **Harness CI** (free tier) as an alternative CI/CD pipeline. The pipeline file is at `.harness/build-apk-pipeline.yaml`.
-
-### What's Fixed (v1.1.0)
-
-| Issue | Fix |
-|-------|-----|
-| ❌ Missing `set -e` error handling | ✅ Added |
-| ❌ No timeout limit for builds | ✅ Added timeout |
-| ❌ GRADLE_OPTS YAML escaping | ✅ Fixed |
-| ❌ No Android license acceptance | ✅ Added |
-| ❌ No APK verification | ✅ Added |
-
-See [SETUP_GUIDE.md](SETUP_GUIDE.md#-harness-ci-pipeline-setup) for import instructions.
-
-<p align="right"><a href="#readme-top">⬆ Back to top</a></p>
-
----
-
 ## 📜 License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
