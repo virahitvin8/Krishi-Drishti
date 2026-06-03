@@ -1,86 +1,295 @@
-# Contributing to Krishi Drishti
+# 🤝 Contributing to Krishi Drishti
 
-Thank you for your interest in contributing to **Krishi Drishti**!  
-We’re building a free, farmer-first satellite intelligence platform for Indian agriculture.
+Thank you for your interest in contributing to **Krishi Drishti** — the free satellite-based crop health monitoring platform for Indian farmers!  🌾🛰️
+
+We welcome contributions from **developers, agriculturists, translators, UI/UX designers, satellite data scientists, and domain experts**.
 
 ---
 
-## 🌱 How Can You Contribute?
+## 📋 Table of Contents
 
-We welcome contributions in many areas:
+- [🌱 How to Contribute](#-how-to-contribute)
+- [🚀 Getting Started](#-getting-started)
+- [📝 Code Style Guidelines](#-code-style-guidelines)
+- [🧪 Testing](#-testing)
+- [🗂️ Project Structure](#️-project-structure)
+- [🔍 Focus Areas](#-focus-areas)
+- [💬 Communication](#-communication)
+- [📜 Code of Conduct](#-code-of-conduct)
+- [🙏 Thank You](#-thank-you)
 
-### High Priority
-- **🌐 Language Support** — Add Hindi, Tamil, Telugu, Marathi & more translations
-- **🛰️ Satellite Integration** — Add new data sources (ISRO, NASA, ESA)
-- **📱 Mobile Experience** — Help build or improve the Flutter mobile app
-- **📊 Pest & Disease Models** — Improve early detection algorithms
+---
 
-### Other Areas
-- 🎨 UI/UX improvements for the web PWA & Flutter app
-- 📖 Documentation & farmer-friendly guides
-- 🧪 Testing with real farm data across India
-- 🗺️ DEM / Topography analysis improvements
-- ⚡ Performance optimization for low-end devices
-- 🐛 Bug fixes and issue triage
+## 🌱 How to Contribute
+
+### 🎯 High Priority Areas
+
+| Priority | Area | Skills Needed | Impact |
+|----------|------|---------------|--------|
+| 🔴 **Critical** | 🌐 **Language Support** — Hindi, Tamil, Telugu, Marathi | Translation | 🎯 Reaches thousands of farmers |
+| 🔴 **Critical** | 🛰️ **Satellite Integration** — New ISRO/NASA data sources | Python, Remote Sensing | 🚀 Adds new analysis capabilities |
+| 🔴 **Critical** | 📱 **Flutter Mobile App** — Improve UI/UX | Flutter, Dart | 🎯 Helps farmers in the field |
+| 🟡 **High** | 🧪 **Pest & Disease Models** | ML, Agronomy | 🌿 Early detection saves crops |
+| 🟡 **High** | 🗺️ **Map & Layer Features** | Leaflet.js, GIS | 📊 Better visualization |
+| 🟡 **High** | ⚡ **Quantum Computing** | Qiskit, Python | 🔬 Next-gen analysis |
+| 🟢 **Medium** | 📖 **Documentation** | Technical Writing | 🎯 Helps all users |
+| 🟢 **Medium** | 🎨 **UI/UX Design** | Figma, Design | 📱 Better farmer experience |
+| 🟢 **Medium** | 🐛 **Bug Fixes** | Python, JS, Dart | ✅ Improves reliability |
+
+### Other Ways to Help
+
+- ⭐ **Star the repository** — helps others discover the project
+- 🐛 **Report bugs** — open an issue with detailed reproduction steps
+- 💡 **Suggest features** — start a discussion with your idea
+- 📢 **Share with farmers** — spread the word in farming communities
+- 🌐 **Translate** — add your language to the translation files
 
 ---
 
 ## 🚀 Getting Started
 
-1. **Fork** the repository
-2. **Clone** your fork:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/Krishi-Drishti.git
-   cd Krishi-Drishti
-   ```
-3. Create a new branch:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-4. Make your changes
-5. Commit and push:
-   ```bash
-   git add .
-   git commit -m "feat: add your feature description"
-   git push origin feature/your-feature-name
-   ```
-6. Open a **Pull Request**
+### Step 1: Fork & Clone
+
+```bash
+# Fork the repository on GitHub
+# Then clone your fork:
+git clone https://github.com/YOUR_USERNAME/Krishi-Drishti.git
+cd Krishi-Drishti
+```
+
+### Step 2: Create a Branch
+
+```bash
+# Use descriptive branch names:
+git checkout -b feature/add-tamil-translations
+git checkout -b fix/csv-upload-error
+git checkout -b docs/improve-setup-guide
+```
+
+### Step 3: Make Your Changes
+
+- Follow the [Code Style Guidelines](#-code-style-guidelines) below
+- Keep changes focused — one feature/fix per branch
+- Write meaningful commit messages
+
+### Step 4: Commit & Push
+
+```bash
+git add .
+git commit -m "feat: add Tamil (தமிழ்) language support"
+# Use conventional commits:
+# feat:     New feature
+# fix:      Bug fix
+# docs:     Documentation
+# style:    Formatting
+# refactor: Code restructuring
+# test:     Adding tests
+# chore:    Maintenance
+
+git push origin feature/add-tamil-translations
+```
+
+### Step 5: Open a Pull Request
+
+1. Go to [github.com/virahitvin8/Krishi-Drishti](https://github.com/virahitvin8/Krishi-Drishti)
+2. Click **"Compare & pull request"**
+3. Describe your changes clearly
+4. Reference any related issues
+5. Submit your PR 🚀
 
 ---
 
-## 📝 Code Style
+## 📝 Code Style Guidelines
 
-- Keep code clean and well-commented
-- Use meaningful variable and function names
-- Follow existing folder structure
-- For frontend: Prefer Tailwind classes and keep it lightweight
+### General
+
+- Write **clean, commented code**
+- Use **meaningful** variable and function names
+- Follow the existing patterns in the codebase
+- Keep functions **small and focused**
+
+### Python (Backend)
+
+```python
+# ✅ Good
+def calculate_ndvi(nir_band: float, red_band: float) -> float:
+    """Calculate Normalized Difference Vegetation Index."""
+    return (nir_band - red_band) / (nir_band + red_band + 1e-10)
+
+# ❌ Avoid
+def calc(x, y):
+    return (x-y)/(x+y)
+```
+
+- Follow [PEP 8](https://peps.python.org/pep-0008/) style guide
+- Use type hints for all function parameters and returns
+- Write docstrings for all public functions
+
+### JavaScript (Frontend)
+
+```javascript
+// ✅ Good
+function updateWeatherDisplay(temperature, humidity, windSpeed) {
+    // Updates the weather section with live data
+    const weatherEl = document.getElementById('weatherContent');
+    weatherEl.innerHTML = `${temperature}°C • ${humidity}% humidity`;
+}
+
+// ❌ Avoid
+function up(a,b,c) { document.getElementById('x').innerHTML = a+b+c; }
+```
+
+- Use modern ES6+ syntax
+- Prefer `const` over `let` (use `let` only for reassignment)
+- Use template literals for string interpolation
+
+### Flutter/Dart
+
+- Follow [Dart style guide](https://dart.dev/guides/language/effective-dart)
+- Use `const` constructors where possible
+- Prefer named parameters for widget constructors
 
 ---
 
 ## 🧪 Testing
 
-Before submitting a PR:
-- Test the UI with the demo farm
-- Make sure the hotspot grid renders correctly
-- Verify that individual metric percentages display properly
+Before submitting a PR, please verify:
+
+### Web App
+- ✅ Open `frontend/index.html` in browser
+- ✅ Test with **"🎯 Demo"** farm button
+- ✅ Verify hotspot grid renders correctly
+- ✅ Test language switching (English → Hindi → Telugu)
+- ✅ Check all modals open/close properly
+- ✅ Verify responsive layout on mobile viewport
+
+### Flutter App
+- ✅ `flutter analyze` passes with no errors
+- ✅ `flutter build apk --debug` builds successfully
+- ✅ Test on actual Android device (emulator is okay)
+
+### Backend
+- ✅ `python -m pytest` passes (if tests exist)
+- ✅ `uvicorn main:app` starts without errors
+- ✅ `/health` endpoint returns 200
+
+---
+
+## 🗂️ Project Structure
+
+```
+KrishiDrishti_Final_v4/
+├── .github/            # GitHub config, workflows, assets
+│   ├── workflows/      # GitHub Actions CI/CD
+│   └── screenshots/    # App screenshots for README
+├── frontend/           # 🌐 Web PWA (HTML + Leaflet.js)
+│   └── index.html      # Main web application
+├── flutter_app/        # 📱 Native Android (Flutter)
+│   └── lib/            # Dart source code
+├── backend/            # 🖥️ Python API (FastAPI)
+│   ├── routers/        # API endpoint handlers
+│   └── services/       # Business logic
+├── README.md           # 📖 Project documentation
+└── SETUP_GUIDE.md      # 📘 Complete setup guide
+```
+
+---
+
+## 🔍 Focus Areas
+
+### 🌐 Translations
+Add your language to `frontend/index.html`:
+```javascript
+const TRANSLATIONS = {
+    en: { ... },
+    hi: { ... },
+    te: { ... },
+    // ADD YOUR LANGUAGE HERE
+    ta: { app_name: 'கிருஷி திருஷ்டி', ... },
+};
+```
+
+### 🛰️ Satellite Integration
+Add new satellite sources in `backend/routers/analysis.py`:
+- ISRO Oceansat-3 (OCM-3)
+- NASA ECOSTRESS
+- GCOM-C (JAXA)
+
+### 📱 Flutter UI
+Improve the mobile experience:
+- Offline map support
+- GPS-based auto-farm detection
+- Push notifications for satellite passes
+- Widget for Android home screen
+
+### ⚡ Quantum Computing
+Enhance `backend/services/quantum_service.py`:
+- Add more quantum algorithms
+- Implement QAOA for irrigation routing
+- Create quantum-enhanced pest prediction
 
 ---
 
 ## 💬 Communication
 
-- Open an issue for bugs or feature requests
-- Join discussions in the Issues tab
-- Be respectful and constructive
+- **🐛 Bug Reports:** [Open an issue](https://github.com/virahitvin8/Krishi-Drishti/issues/new)
+- **💡 Feature Requests:** [Start a discussion](https://github.com/virahitvin8/Krishi-Drishti/discussions)
+- **📧 Direct Contact:** akshitvinay4636@gmail.com
+
+### Guidelines
+- Be **respectful and constructive** in all communications
+- Search existing issues before creating new ones
+- Provide **detailed reproduction steps** for bugs
+- Include **screenshots** if relevant
+
+---
+
+## 📜 Code of Conduct
+
+### Our Pledge
+
+We are committed to providing a **welcoming, inclusive, and harassment-free** experience for everyone, regardless of:
+- Age, body size, disability, ethnicity
+- Gender identity and expression
+- Level of experience
+- Nationality, personal appearance
+- Race, religion, or sexual identity
+
+### Our Standards
+
+**Positive behavior:**
+- Using welcoming and inclusive language
+- Being respectful of differing viewpoints
+- Gracefully accepting constructive criticism
+- Focusing on what's best for the community and farmers
+
+**Unacceptable behavior:**
+- Harassment, trolling, or insults
+- Publishing others' private information
+- Other conduct which could reasonably be considered inappropriate
 
 ---
 
 ## 🙏 Thank You
 
-Every contribution — big or small — helps Indian farmers get better tools.  
-We truly appreciate your time and effort.
+Every contribution — big or small — helps Indian farmers get better tools. Whether you're fixing a typo, adding a translation, writing code, or reporting a bug, you're making a difference.
 
-**Jai Kisan. Jai Vigyan.**
+> **"जय किसान • जय विज्ञान"** — Victory to farmers, victory to science
+
+**Let's build the best free farming tool for India! 🌾🛰️🇮🇳**
 
 ---
 
-*Maintained with ❤️ by Akshit*
+<div align="center">
+  
+  [![Star](https://img.shields.io/github/stars/virahitvin8/Krishi-Drishti?style=social&label=⭐%20Star%20this%20repo)](https://github.com/virahitvin8/Krishi-Drishti)
+  
+  <br>
+  
+  *Maintained with ❤️ by [Akshit](https://github.com/virahitvin8)*
+  
+  <br>
+  
+  <sub>MIT License • Free & Open Source</sub>
+  
+</div>
