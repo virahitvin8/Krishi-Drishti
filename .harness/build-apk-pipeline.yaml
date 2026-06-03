@@ -1,3 +1,23 @@
+# ============================================================
+# Krishi Drishti — Harness CI Pipeline (Free Tier)
+# ============================================================
+# ✅ Uses Docker image with Flutter + Android SDK pre-installed
+#
+# ⚠️ IMPORTANT SETUP BEFORE USE:
+#   1. Create a Docker Connector in Harness:
+#      - Go to Project Settings → Connectors → New Connector → Docker Registry
+#      - For ghcr.io: Provider Type = "Other", URL = "https://ghcr.io"
+#        Use GitHub username + PAT (read:packages scope) for auth
+#      - For Docker Hub: Provider Type = "Docker Hub"
+#      - Give it an identifier (e.g., "ghcr_connector" or "dockerhub")
+#   2. Update `connectorRef` below to match your connector's identifier
+#   3. Update `account.harnessCloud` if your cloud connector has a different ID
+#
+# 📦 Docker Image: ghcr.io/cirruslabs/flutter
+#   - Flutter + Android SDK pre-installed
+#   - ⚠️ Deprecated after May 1, 2026 — consider migrating to your own image
+# ============================================================
+
 pipeline:
   name: KrishiDrishti APK Build
   identifier: krishi_drishti_apk_build
@@ -23,6 +43,7 @@ pipeline:
           infrastructure:
             type: Cloud
             spec:
+              # ⚠️ Update this to your Harness Cloud connector ID
               connectorRef: account.harnessCloud
               platform:
                 os: Linux
@@ -39,28 +60,69 @@ pipeline:
                   type: Run
                   name: Build Flutter APK
                   identifier: build_flutter_apk
+                  timeout: 30m
                   spec:
+                    # ⚠️ IMPORTANT: Replace this with YOUR Docker connector ID
+                    # Example: account.DockerHub, account.ghcr_connector, etc.
                     connectorRef: account.harnessImage
                     image: ghcr.io/cirruslabs/flutter:3.44.1
                     shell: Sh
                     command: |-
+                      set -e  # Exit on any error
+
+                      echo "========================================"
+                      echo "  Krishi Drishti — Flutter APK Build"
+                      echo "========================================"
+
+                      echo ""
                       echo "=== Flutter version ==="
                       flutter --version
 
+                      echo ""
+                      echo "=== Checking Android SDK ==="
+                      echo "ANDROID_HOME: ${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+                      ls -la ${ANDROID_HOME:-/usr/local/lib/android/sdk}/platforms/ 2>/dev/null || echo "No Android platforms dir"
+                      ls -la ${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools/ 2>/dev/null || echo "No build-tools dir"
+
+                      echo ""
+                      echo "=== Accept Android licenses ==="
+                      yes | flutter doctor --android-licenses 2>/dev/null || true
+
+                      echo ""
+                      echo "=== Flutter doctor ==="
+                      flutter doctor 2>&1 || true
+
+                      echo ""
                       echo "=== Get dependencies ==="
                       cd KrishiDrishti_Final_v4/flutter_app
                       flutter pub get
 
-                      echo "=== Run analyze ==="
+                      echo ""
+                      echo "=== Run static analysis ==="
                       flutter analyze
 
-                      echo "=== Build APK ==="
+                      echo ""
+                      echo "=== Build debug APK ==="
                       flutter build apk --debug
 
-                      echo "=== Copy APK artifact ==="
-                      cp build/app/outputs/flutter-apk/app-debug.apk \
-                         ../../krishi-drishti-debug.apk
+                      echo ""
+                      echo "=== Verify APK ==="
+                      APK_PATH="build/app/outputs/flutter-apk/app-debug.apk"
+                      if [ -f "$APK_PATH" ]; then
+                        echo "✅ APK built successfully!"
+                        ls -lh "$APK_PATH"
+                      else
+                        echo "❌ APK not found at $APK_PATH"
+                        exit 1
+                      fi
+
+                      echo ""
+                      echo "=== Copy APK to artifacts ==="
+                      cp "$APK_PATH" ../../krishi-drishti-debug.apk
                       ls -lh ../../krishi-drishti-debug.apk
+
+                      echo ""
+                      echo "=== Build complete ==="
 
               - step:
                   type: Artifact
@@ -80,4 +142,4 @@ pipeline:
             value: /usr/local/lib/android/sdk
           - name: GRADLE_OPTS
             type: String
-            value: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx4g"
+            value: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx4g
