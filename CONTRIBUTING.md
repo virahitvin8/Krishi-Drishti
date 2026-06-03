@@ -10,17 +10,18 @@ We’re building a free, farmer-first satellite intelligence platform for Indian
 We welcome contributions in many areas:
 
 ### High Priority
-- **Language Support** — Add Hindi, Tamil, Telugu, Marathi translations
-- **Pest & Disease Models** — Improve early detection algorithms
-- **DEM / Topography** — Better slope, drainage, and aspect analysis
-- **Mobile Experience** — Help build or improve the Flutter mobile app
+- **🌐 Language Support** — Add Hindi, Tamil, Telugu, Marathi & more translations
+- **🛰️ Satellite Integration** — Add new data sources (ISRO, NASA, ESA)
+- **📱 Mobile Experience** — Help build or improve the Flutter mobile app
+- **📊 Pest & Disease Models** — Improve early detection algorithms
 
 ### Other Areas
-- UI/UX improvements
-- Documentation & farmer guides
-- Testing with real farm data
-- Integration with more satellite sources
-- Performance optimization
+- 🎨 UI/UX improvements for the web PWA & Flutter app
+- 📖 Documentation & farmer-friendly guides
+- 🧪 Testing with real farm data across India
+- 🗺️ DEM / Topography analysis improvements
+- ⚡ Performance optimization for low-end devices
+- 🐛 Bug fixes and issue triage
 
 ---
 

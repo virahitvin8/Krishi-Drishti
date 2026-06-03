@@ -56,7 +56,6 @@ flutter_app/.pub/
 flutter_app/build/
 flutter_app/.flutter-plugins
 flutter_app/.flutter-plugins-dependencies
-flutter_app/pubspec.lock
 flutter_app/**/local.properties
 flutter_app/android/.gradle/
 flutter_app/android/gradle/wrapper/gradle-wrapper.jar
